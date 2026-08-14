@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Kontrak — manage gigs, get paid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --fs-scale: 1;
+    --font-display: 'Space Grotesk', 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  /* ---- Dark theme (default) — Claude-style warm charcoal palette ---- */
+  [data-theme="dark"] {
+    --bg: #262624;
+    --bg-elevated: #30302e;
+    --bg-elevated-2: #3b3a37;
+    --bg-sunken: #1e1d1c;
+    --border: #47453f;
+    --border-subtle: #38372f;
+    --text: #f6f4ee;
+    --text-secondary: #b6b3aa;
+    --text-tertiary: #86837a;
+    --accent: #da7756;
+    --accent-hover: #e6906f;
+    --accent-text: #2a1a12;
+    --accent-soft: rgba(218,119,86,0.16);
+    --success: #8bab6c;
+    --success-soft: rgba(139,171,108,0.16);
+    --warning: #d6a24f;
+    --warning-soft: rgba(214,162,79,0.16);
+    --danger: #c8695f;
+    --danger-soft: rgba(200,105,95,0.16);
+    --info: #7fa8c9;
+    --info-soft: rgba(127,168,201,0.16);
+    --shadow: 0 8px 30px rgba(0,0,0,0.45);
+    --overlay: rgba(15,14,13,0.6);
+    color-scheme: dark;
+  }
+
+  /* ---- Light theme ---- */
+  [data-theme="light"] {
+    --bg: #faf9f5;
+    --bg-elevated: #ffffff;
+    --bg-elevated-2: #f1efe6;
+    --bg-sunken: #efece2;
+    --border: #e3dfd2;
+    --border-subtle: #ece9dd;
+    --text: #221f1a;
+    --text-secondary: #5c584f;
+    --text-tertiary: #8b877b;
+    --accent: #bf5b39;
+    --accent-hover: #a84c2d;
+    --accent-text: #fff8f4;
+    --accent-soft: rgba(191,91,57,0.10);
+    --success: #4f7a3c;
+    --success-soft: rgba(79,122,60,0.12);
+    --warning: #a9761f;
+    --warning-soft: rgba(169,118,31,0.12);
+    --danger: #a8392f;
+    --danger-soft: rgba(168,57,47,0.12);
+    --info: #3f6a8a;
+    --info-soft: rgba(63,106,138,0.12);
+    --shadow: 0 8px 30px rgba(60,50,30,0.12);
+    --overlay: rgba(40,35,25,0.35);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background: var(--bg-sunken);
+    color: var(--text);
+    font-size: calc(15px * var(--fs-scale));
+    line-height: 1.45;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  @media (min-width: 560px) {
+    body {
+      background: var(--bg-sunken);
+    }
+  }
+
+  button, input, select, textarea { font-family: inherit; color: inherit; }
+  button { cursor: pointer; }
+  a { color: inherit; }
+  ::selection { background: var(--accent-soft); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------------- App shell ---------------- */
+  #root { width: 100%; height: 100vh; height: 100dvh; }
+
+  .app-shell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background: var(--bg-sunken);
+  }
+
+  /* Sidebar — desktop/tablet only */
+  .sidebar { display: none; }
+  @media (min-width: 860px) {
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      width: 236px;
+      flex-shrink: 0;
+      height: 100%;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border-subtle);
+      padding: 22px 16px;
+    }
+  }
+  .sidebar-brand {
+    padding: 2px 10px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 10px;
+  }
+  .sidebar-brand .wordmark { font-size: 1.25em; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 12px; border-radius: 10px;
+    background: none; border: none; text-align: left;
+    color: var(--text-secondary); font-size: 0.88em; font-weight: 600;
+    position: relative;
+  }
+  .sidebar-item:hover { background: var(--bg-elevated-2); color: var(--text); }
+  .sidebar-item.active { background: var(--accent-soft); color: var(--accent); }
+  .sidebar-item.active::before {
+    content: ""; position: absolute; left: -16px; top: 9px; bottom: 9px;
+    width: 3px; background: var(--accent); border-radius: 0 3px 3px 0;
+  }
+  .sidebar-profile {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 12px; padding: 9px 10px;
+    border-radius: 12px; border: 1px solid var(--border-subtle);
+    background: var(--bg-elevated-2);
+    text-align: left;
+  }
+  .sidebar-profile:hover { border-color: var(--accent); }
+
+  .device {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    min-width: 0;
+    background: var(--bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 12px;
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+  @media (min-width: 860px) {
+    .topbar { padding: 22px 32px 16px; border-bottom: 1px solid var(--border-subtle); }
+  }
+  .topbar-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.28em;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topbar-sub { color: var(--text-tertiary); font-size: 0.82em; margin-top: 2px; }
+  .header-new-job-btn { display: none; }
+  @media (min-width: 860px) {
+    .header-new-job-btn { display: inline-flex; }
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 20px 96px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .content::-webkit-scrollbar { width: 0; }
+  @media (min-width: 860px) {
+    .content { padding: 24px 32px 48px; max-width: 1180px; margin: 0 auto; width: 100%; }
+  }
+
+  .bottom-nav {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    display: flex;
+    background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-subtle);
+    padding: 8px 6px calc(env(safe-area-inset-bottom, 8px) + 4px);
+    z-index: 40;
+  }
+  @media (min-width: 860px) {
+    .bottom-nav { display: none; }
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    padding: 6px 2px;
+    color: var(--text-tertiary);
+    font-size: 0.68em;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    transition: color .15s ease;
+  }
+  .nav-item.active { color: var(--accent); }
+  .nav-item .nav-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    margin-top: -1px;
+  }
+  .nav-item.active .nav-dot { opacity: 1; }
+
+  /* ---------------- Icon ---------------- */
+  svg.icn { flex-shrink: 0; }
+
+  /* ---------------- Buttons ---------------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    padding: 11px 16px;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: transform .1s ease, background .15s ease, border-color .15s ease;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: var(--accent-text); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--bg-elevated-2); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-danger { background: var(--danger-soft); color: var(--danger); }
+  .btn-block { width: 100%; }
+  .btn-sm { padding: 7px 12px; font-size: 0.78em; }
+  .btn-icon { padding: 9px; border-radius: 50%; }
+
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--bg-elevated-2); border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .fab {
+    position: absolute;
+    right: 20px; bottom: 84px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-text);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+    border: none;
+    z-index: 30;
+  }
+  .fab:active { transform: scale(0.94); }
+  @media (min-width: 860px) {
+    .fab { right: 40px; bottom: 40px; }
+  }
+
+  .fab-dial {
+    position: absolute;
+    right: 20px; bottom: 84px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  @media (min-width: 860px) {
+    .fab-dial { right: 40px; bottom: 40px; }
+  }
+  .fab-dial .fab { position: static; right: auto; bottom: auto; }
+
+  .fab-backdrop { position: absolute; inset: 0; z-index: 25; background: transparent; }
+
+  .fab-menu-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+    padding: 7px 7px 7px 16px; border-radius: 100px;
+    font-weight: 600; font-size: 0.85em; color: var(--text);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    white-space: nowrap;
+    animation: fab-pop .16s ease;
+  }
+  .fab-menu-item:hover { border-color: var(--accent); }
+  .fab-menu-icon {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  @keyframes fab-pop {
+    from { opacity: 0; transform: translateY(6px) scale(0.92); }
+    to { opacity: 1; transform: none; }
+  }
+
+
+  /* ---------------- Cards ---------------- */
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+  }
+  .card + .card { margin-top: 10px; }
+  .card-tap { text-align: left; width: 100%; background: var(--bg-elevated); }
+  .card-tap:hover { border-color: var(--border); }
+  .row { display: flex; align-items: center; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .stack { display: flex; flex-direction: column; }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95em;
+    letter-spacing: 0.01em;
+    margin: 22px 0 10px;
+    color: var(--text);
+  }
+  .section-title:first-child { margin-top: 4px; }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68em;
+    font-weight: 600;
+    color: var(--text-tertiary);
+  }
+
+  /* ---------------- Badges ---------------- */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.72em; font-weight: 600;
+    padding: 4px 9px; border-radius: 100px;
+    white-space: nowrap;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .badge-scheduled { background: var(--info-soft); color: var(--info); }
+  .badge-in_progress { background: var(--warning-soft); color: var(--warning); }
+  .badge-review { background: var(--accent-soft); color: var(--accent); }
+  .badge-complete { background: var(--success-soft); color: var(--success); }
+  .badge-paid { background: var(--success-soft); color: var(--success); }
+  .badge-draft { background: var(--bg-elevated-2); color: var(--text-secondary); }
+  .badge-sent { background: var(--info-soft); color: var(--info); }
+  .badge-overdue { background: var(--danger-soft); color: var(--danger); }
+
+  /* ---------------- Avatar ---------------- */
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85em; flex-shrink: 0;
+    font-family: var(--font-display);
+  }
+  .avatar-sm { width: 32px; height: 32px; font-size: 0.72em; }
+  .avatar-lg { width: 60px; height: 60px; font-size: 1.2em; }
+
+  /* ---------------- Forms ---------------- */
+  .form-group { margin-bottom: 14px; }
+  .label {
+    display: block; font-size: 0.78em; font-weight: 600;
+    color: var(--text-secondary); margin-bottom: 6px;
+  }
+  .input, .textarea, .select {
+    width: 100%;
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 12px;
+    color: var(--text);
+    font-size: 0.92em;
+  }
+  .input:focus, .textarea:focus, .select:focus { border-color: var(--accent); }
+  .input::placeholder, .textarea::placeholder { color: var(--text-tertiary); }
+  .textarea { resize: vertical; min-height: 74px; }
+  .input-row { display: flex; gap: 10px; }
+  .input-row > * { flex: 1; }
+
+  .segmented {
+    display: flex; gap: 4px; background: var(--bg-elevated-2);
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+    padding: 3px;
+  }
+  .segmented button {
+    flex: 1; background: none; border: none; padding: 8px 6px;
+    border-radius: 6px; font-size: 0.82em; font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .segmented button.active { background: var(--bg-elevated); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+
+  .chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin: 0 -20px 14px; padding-left: 20px; padding-right: 20px; }
+  .chip-row::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; padding: 7px 13px; border-radius: 100px;
+    border: 1px solid var(--border); background: var(--bg-elevated);
+    color: var(--text-secondary); font-size: 0.8em; font-weight: 600;
+  }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 14px;
+  }
+  .search-bar input { flex: 1; background: none; border: none; font-size: 0.9em; }
+  .search-bar input:focus { outline: none; }
+
+  /* ---------------- Stat cards ---------------- */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }
+
+  /* ---------------- Responsive layout helpers (desktop) ---------------- */
+  .grid-list { display: block; }
+  .dash-columns { display: block; }
+  .job-detail-grid { display: block; }
+  .client-detail-grid { display: block; }
+  .detail-narrow { display: block; }
+
+  @media (min-width: 860px) {
+    .grid-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+    .grid-list .card, .grid-list .ticket { margin-top: 0; margin-bottom: 0 !important; }
+
+    .dash-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .job-detail-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .job-detail-grid .col-main .section-title:first-child { margin-top: 4px; }
+
+    .client-detail-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .detail-narrow { max-width: 640px; margin: 0 auto; }
+  }
+  .stat-card {
+    background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md); padding: 12px 10px;
+  }
+  .stat-value { font-family: var(--font-mono); font-weight: 600; font-size: 1.08em; }
+  .stat-label { font-size: 0.68em; color: var(--text-tertiary); margin-top: 3px; font-weight: 500; }
+
+  /* ---------------- Progress bar mini ---------------- */
+  .progress-mini { height: 5px; border-radius: 3px; background: var(--bg-elevated-2); overflow: hidden; margin-top: 8px; }
+  .progress-mini-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s ease; }
+
+  /* ---------------- Signature: Work-order stepper ---------------- */
+  .stepper {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    position: relative; padding: 6px 2px 2px;
+  }
+  .stepper-item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    position: relative; flex: 1; z-index: 2;
+  }
+  .stepper-track {
+    position: absolute; top: 15px; left: 6%; right: 6%; height: 2px;
+    background: var(--border); z-index: 1;
+  }
+  .stepper-track-fill {
+    position: absolute; top: 15px; left: 6%; height: 2px;
+    background: var(--accent); z-index: 1; transition: width .35s ease;
+  }
+  .stepper-dot {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-elevated); border: 2px solid var(--border);
+    color: var(--text-tertiary);
+  }
+  .stepper-dot.done { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .stepper-dot.current {
+    border-color: var(--accent); color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .stepper-label { font-size: 0.62em; font-weight: 600; color: var(--text-tertiary); text-align: center; }
+  .stepper-label.done, .stepper-label.current { color: var(--text); }
+
+  .stamp {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 2px solid var(--accent); color: var(--accent);
+    border-radius: 8px; padding: 6px 12px;
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 0.78em; letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--accent-soft);
+  }
+
+  /* ---------------- Ticket / invoice styling ---------------- */
+  .ticket {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .ticket-perf {
+    height: 12px;
+    background-image: radial-gradient(circle at 10px 6px, var(--bg-sunken) 5px, transparent 5.5px);
+    background-size: 20px 12px;
+    background-repeat: repeat-x;
+  }
+  @media (min-width: 560px) {
+    .ticket-perf { background-image: radial-gradient(circle at 10px 6px, var(--bg) 5px, transparent 5.5px); }
+  }
+  .ticket-body { padding: 16px; }
+  .ticket-dash {
+    border-top: 1.5px dashed var(--border);
+    margin: 12px 0;
+  }
+
+  /* ---------------- Photo grid ---------------- */
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .photo-tile {
+    aspect-ratio: 1; border-radius: var(--radius-sm);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.92);
+    position: relative; overflow: hidden; border: 1px solid var(--border-subtle);
+  }
+  .photo-tile-label {
+    position: absolute; bottom: 5px; left: 5px; right: 5px;
+    font-size: 0.6em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    background: rgba(0,0,0,0.4); border-radius: 4px; padding: 2px 5px;
+    text-align: center;
+  }
+  .photo-tile-add {
+    background: var(--bg-elevated-2); border: 1.5px dashed var(--border);
+    color: var(--text-tertiary);
+  }
+
+  /* ---------------- File row ---------------- */
+  .file-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 4px; border-bottom: 1px solid var(--border-subtle);
+  }
+  .file-row:last-child { border-bottom: none; }
+  .file-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--bg-elevated-2); display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); flex-shrink: 0;
+  }
+
+  /* ---------------- QR box ---------------- */
+  .qr-wrap {
+    display: flex; align-items: center; justify-content: center;
+    background: #ffffff; border-radius: var(--radius-md);
+    padding: 14px; width: 176px; height: 176px; margin: 0 auto;
+  }
+  .qr-fallback {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
+    width: 100%; height: 100%;
+  }
+  .qr-fallback div { background: #1a1a1a; border-radius: 1px; }
+  .qr-fallback div.off { background: transparent; }
+
+  /* ---------------- Modal / sheet ---------------- */
+  .modal-overlay {
+    position: absolute; inset: 0; background: var(--overlay);
+    display: flex; align-items: flex-end; z-index: 50;
+  }
+  .modal-sheet {
+    background: var(--bg-elevated); width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 88%; overflow-y: auto;
+    padding: 8px 20px 28px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .modal-handle { width: 36px; height: 4px; border-radius: 3px; background: var(--border); margin: 8px auto 14px; }
+  .modal-title { font-family: var(--font-display); font-weight: 600; font-size: 1.15em; margin-bottom: 4px; }
+  @media (min-width: 860px) {
+    .modal-overlay { align-items: center; justify-content: center; padding: 24px; }
+    .modal-sheet {
+      width: 100%; max-width: 480px; border-radius: 18px;
+      max-height: 82vh; border: 1px solid var(--border-subtle); border-top: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow);
+      padding: 10px 24px 26px;
+    }
+    .modal-handle { display: none; }
+  }
+
+  /* ---------------- Toast ---------------- */
+  .toast-wrap {
+    position: absolute; left: 20px; right: 20px; bottom: 88px; z-index: 60;
+    display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  }
+  .toast {
+    background: var(--text); color: var(--bg);
+    border-radius: var(--radius-md); padding: 11px 14px;
+    font-size: 0.84em; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: var(--shadow);
+    animation: toast-in .22s ease;
+  }
+  @keyframes toast-in { from { opacity:0; transform: translateY(8px);} to {opacity:1; transform:none;} }
+
+  /* ---------------- Empty state ---------------- */
+  .empty-state {
+    text-align: center; padding: 46px 16px; color: var(--text-tertiary);
+  }
+  .empty-state .icon-btn { width: 52px; height: 52px; margin: 0 auto 12px; }
+
+  /* ---------------- Onboarding ---------------- */
+  .onboard-screen {
+    height: 100%; display: flex; flex-direction: column;
+    background:
+      radial-gradient(circle at 15% 0%, var(--accent-soft), transparent 45%),
+      var(--bg);
+  }
+  .onboard-top { display: flex; justify-content: flex-end; padding: 18px 20px 0; }
+  .onboard-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 30px; text-align: center; }
+  .onboard-icon {
+    width: 92px; height: 92px; border-radius: 26px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 26px;
+  }
+  .onboard-title { font-family: var(--font-display); font-weight: 700; font-size: 1.5em; letter-spacing: -0.01em; margin-bottom: 10px; }
+  .onboard-desc { color: var(--text-secondary); font-size: 0.94em; line-height: 1.55; max-width: 280px; }
+  .onboard-dots { display: flex; gap: 6px; justify-content: center; margin: 26px 0; }
+  .onboard-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: all .2s ease; }
+  .onboard-dot.active { width: 20px; background: var(--accent); }
+  .onboard-bottom { padding: 0 24px 34px; }
+
+  .wordmark {
+    font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em;
+  }
+
+  .divider { height: 1px; background: var(--border-subtle); margin: 16px 0; }
+
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 0; border-bottom: 1px solid var(--border-subtle);
+    gap: 12px;
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-row-text { display: flex; flex-direction: column; gap: 2px; }
+  .setting-row-title { font-size: 0.9em; font-weight: 600; }
+  .setting-row-sub { font-size: 0.76em; color: var(--text-tertiary); }
+
+  .switch {
+    width: 42px; height: 24px; border-radius: 100px;
+    background: var(--bg-elevated-2); border: 1px solid var(--border);
+    position: relative; flex-shrink: 0;
+  }
+  .switch.on { background: var(--accent); border-color: var(--accent); }
+  .switch-knob {
+    position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--bg-elevated); transition: left .18s ease;
+  }
+  .switch.on .switch-knob { left: 20px; background: #fff; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  // Diagnostic: if core libraries fail to load (e.g. a blocked network), show a clear
+  // message instead of a silent blank screen.
+  setTimeout(function () {
+    var root = document.getElementById("root");
+    if (root && !root.hasChildNodes()) {
+      var missing = [];
+      if (typeof React === "undefined") missing.push("React");
+      if (typeof ReactDOM === "undefined") missing.push("ReactDOM");
+      if (typeof Babel === "undefined") missing.push("Babel");
+      if (missing.length) {
+        root.innerHTML =
+          '<div style="max-width:420px;margin:60px auto;padding:20px;font-family:sans-serif;' +
+          'background:#30302e;color:#f6f4ee;border-radius:12px;border:1px solid #47453f;">' +
+          '<strong>Kontrak couldn\'t load ' + missing.join(", ") + '.</strong>' +
+          '<p style="color:#b6b3aa;font-size:0.9em;">This usually means the script CDN ' +
+          '(cdnjs.cloudflare.com) is blocked on this network or by a browser extension. ' +
+          'Try another network, disable ad/script blockers for this file, or open it in a different browser.</p></div>';
+      }
+    }
+  }, 4000);
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+/* ============================== ICONS ============================== */
+function Icon({ name, size = 20, className = "" }) {
+  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+    strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", className: "icn " + className };
+  switch (name) {
+    case "home": return <svg {...p}><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>;
+    case "users": return <svg {...p}><circle cx="8.5" cy="8" r="3.2"/><path d="M2.5 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.2c2.3.4 4 2.6 4 5.8"/></svg>;
+    case "briefcase": return <svg {...p}><rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M8 7.5V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5"/><path d="M3 12.5h18"/></svg>;
+    case "wallet": return <svg {...p}><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M16 12.5h3"/><path d="M3 9.5h18"/></svg>;
+    case "sliders": return <svg {...p}><path d="M4 6h10"/><path d="M18 6h2"/><circle cx="15" cy="6" r="2.1"/><path d="M4 12h4"/><path d="M12 12h8"/><circle cx="9" cy="12" r="2.1"/><path d="M4 18h10"/><path d="M18 18h2"/><circle cx="15" cy="18" r="2.1"/></svg>;
+    case "chevron-right": return <svg {...p}><path d="M9 6l6 6-6 6"/></svg>;
+    case "chevron-left": return <svg {...p}><path d="M15 6l-6 6 6 6"/></svg>;
+    case "arrow-left": return <svg {...p}><path d="M19 12H5"/><path d="M11 19l-7-7 7-7"/></svg>;
+    case "plus": return <svg {...p}><path d="M12 5v14"/><path d="M5 12h14"/></svg>;
+    case "x": return <svg {...p}><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>;
+    case "check": return <svg {...p}><path d="M4 12.5l5 5L20 6"/></svg>;
+    case "check-circle": return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>;
+    case "clock": return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg>;
+    case "zap": return <svg {...p}><path d="M12.5 3 5 14h6l-1 7 7.5-11h-6l1-7Z"/></svg>;
+    case "alert-circle": return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/></svg>;
+    case "camera": return <svg {...p}><path d="M4 8.5a2 2 0 0 1 2-2h1.2l1-1.8h7.6l1 1.8H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.6"/></svg>;
+    case "file": return <svg {...p}><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 13.5h6"/><path d="M9 17h6"/></svg>;
+    case "search": return <svg {...p}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>;
+    case "sun": return <svg {...p}><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg>;
+    case "moon": return <svg {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>;
+    case "map-pin": return <svg {...p}><path d="M12 21s7-6.5 7-11.5a7 7 0 1 0-14 0C5 14.5 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>;
+    case "phone": return <svg {...p}><path d="M6.5 3.5h3l1.5 4.5-2.3 1.7a12 12 0 0 0 5.6 5.6l1.7-2.3 4.5 1.5v3a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 5 5.1a1.5 1.5 0 0 1 1.5-1.6Z"/></svg>;
+    case "mail": return <svg {...p}><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg>;
+    case "send": return <svg {...p}><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/><path d="M10.2 13.5 21 3"/></svg>;
+    case "download": return <svg {...p}><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 18.5h16"/></svg>;
+    case "trash": return <svg {...p}><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6.5 7 7.3 19a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/></svg>;
+    case "edit": return <svg {...p}><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M14 6.5l3.5 3.5"/></svg>;
+    case "building": return <svg {...p}><rect x="4" y="3" width="12" height="18" rx="1"/><path d="M16 9h4v12h-4"/><path d="M7.5 7h1.5M11 7h1.5M7.5 11h1.5M11 11h1.5M7.5 15h1.5M11 15h1.5"/></svg>;
+    case "bell": return <svg {...p}><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>;
+    case "copy": return <svg {...p}><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>;
+    case "qr": return <svg {...p}><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M20 14v3"/><path d="M14 20h3"/></svg>;
+    case "dollar": return <svg {...p}><path d="M12 2.5v19"/><path d="M16.5 6.5c0-1.7-2-3-4.5-3s-4.5 1.3-4.5 3c0 4 9 2.5 9 6.5 0 1.7-2 3-4.5 3s-4.5-1.3-4.5-3"/></svg>;
+    case "type": return <svg {...p}><path d="M5 6h14"/><path d="M12 6v13"/><path d="M9 19h6"/></svg>;
+    case "star": return <svg {...p}><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L12 17l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8Z"/></svg>;
+    case "logout": return <svg {...p}><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M13.5 8 18 12l-4.5 4"/><path d="M18 12H9"/></svg>;
+    default: return null;
+  }
+}
+
+/* ============================== HELPERS ============================== */
+const currency = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n || 0);
+const currency2 = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n || 0);
+const shortDate = (iso) => { if (!iso) return "—"; const d = new Date(iso + "T00:00:00"); return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
+const longDate = (iso) => { if (!iso) return "—"; const d = new Date(iso + "T00:00:00"); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); };
+const initials = (name) => (name || "?").split(" ").filter(Boolean).slice(0,2).map(w => w[0]).join("").toUpperCase();
+const uid = (p) => p + "_" + Math.random().toString(36).slice(2,9);
+const todayISO = () => new Date().toISOString().slice(0,10);
+const addDays = (n) => { const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+
+const STAGES = [
+  { key: "scheduled", label: "Scheduled", icon: "clock" },
+  { key: "in_progress", label: "In Progress", icon: "zap" },
+  { key: "review", label: "Review", icon: "alert-circle" },
+  { key: "complete", label: "Complete", icon: "check-circle" },
+  { key: "paid", label: "Paid", icon: "dollar" },
+];
+const stageIndex = (key) => STAGES.findIndex(s => s.key === key);
+
+const PHOTO_GRADIENTS = [
+  "linear-gradient(135deg,#7a5c46,#3f2f24)",
+  "linear-gradient(135deg,#4a6670,#233238)",
+  "linear-gradient(135deg,#6b5a7a,#2e2638)",
+  "linear-gradient(135deg,#7a6b46,#3a3324)",
+  "linear-gradient(135deg,#5c7a58,#243824)",
+  "linear-gradient(135deg,#7a4f46,#381f19)",
+];
+
+/* ============================== SEED DATA ============================== */
+function seedData() {
+  const clients = [
+    { id: "c1", name: "Marisol Chen", company: "Chen Residence", phone: "(415) 555-0142", email: "marisol.chen@email.com", address: "118 Alder St, San Rafael, CA" },
+    { id: "c2", name: "David Ortega", company: "Ortega Family Trust", phone: "(415) 555-0198", email: "d.ortega@email.com", address: "42 Bayview Ave, Sausalito, CA" },
+    { id: "c3", name: "Priya Nair", company: "Nair & Co.", phone: "(650) 555-0177", email: "priya.nair@email.com", address: "900 Redwood Dr, Mill Valley, CA" },
+    { id: "c4", name: "Tom Whitfield", company: "Whitfield Properties", phone: "(510) 555-0163", email: "tom@whitfieldprop.com", address: "27 Harbor Ct, Tiburon, CA" },
+  ];
+
+  const jobs = [
+    { id: "j1", clientId: "c1", title: "Kitchen backsplash retile", address: "118 Alder St, San Rafael, CA", amount: 2400, startDate: addDays(-8), dueDate: addDays(3), stage: "in_progress",
+      notes: "Client wants matte subway tile, running bond pattern. Grout color: warm gray.",
+      photos: [ { id: "p1", label: "Before", g: 0 }, { id: "p2", label: "Progress", g: 1 } ],
+      files: [ { id: "f1", name: "Tile-spec-sheet.pdf", size: "1.2 MB" } ] },
+    { id: "j2", clientId: "c2", title: "Deck rebuild — rear yard", address: "42 Bayview Ave, Sausalito, CA", amount: 6800, startDate: addDays(-20), dueDate: addDays(-2), stage: "review",
+      notes: "Cedar decking, composite railing. Waiting on client walkthrough before final sign-off.",
+      photos: [ { id: "p3", label: "Before", g: 2 }, { id: "p4", label: "Progress", g: 3 }, { id: "p5", label: "After", g: 4 } ],
+      files: [ { id: "f2", name: "Permit-approval.pdf", size: "480 KB" }, { id: "f3", name: "Material-invoice.pdf", size: "210 KB" } ] },
+    { id: "j3", clientId: "c3", title: "Bathroom vanity install", address: "900 Redwood Dr, Mill Valley, CA", amount: 1350, startDate: addDays(-2), dueDate: addDays(6), stage: "scheduled",
+      notes: "Vanity + fixtures delivered, waiting on plumber schedule to align.",
+      photos: [], files: [] },
+    { id: "j4", clientId: "c4", title: "Exterior paint — full house", address: "27 Harbor Ct, Tiburon, CA", amount: 9200, startDate: addDays(-40), dueDate: addDays(-15), stage: "paid",
+      notes: "Two-coat, Sherwin Williams. Client very happy with color match.",
+      photos: [ { id: "p6", label: "Before", g: 5 }, { id: "p7", label: "After", g: 0 } ],
+      files: [ { id: "f4", name: "Color-approval.pdf", size: "150 KB" } ] },
+    { id: "j5", clientId: "c1", title: "Fence panel repair", address: "118 Alder St, San Rafael, CA", amount: 620, startDate: addDays(-30), dueDate: addDays(-25), stage: "complete",
+      notes: "3 panels replaced after storm damage. Ready to invoice.",
+      photos: [ { id: "p8", label: "After", g: 4 } ], files: [] },
+    { id: "j6", clientId: "c3", title: "Garage shelving build-out", address: "900 Redwood Dr, Mill Valley, CA", amount: 1800, startDate: addDays(1), dueDate: addDays(9), stage: "scheduled",
+      notes: "Custom plywood shelving, 3 bays.", photos: [], files: [] },
+  ];
+
+  const invoices = [
+    { id: "i1", jobId: "j4", clientId: "c4", number: "KTK-1004", dateIssued: addDays(-14), dueDate: addDays(-4),
+      items: [ { desc: "Exterior paint — labor & materials", qty: 1, rate: 9200 } ], status: "paid", paidDate: addDays(-6) },
+    { id: "i2", jobId: "j5", clientId: "c1", number: "KTK-1005", dateIssued: addDays(-24), dueDate: addDays(-10),
+      items: [ { desc: "Fence panel replacement (3 panels)", qty: 3, rate: 190 }, { desc: "Hardware & stain", qty: 1, rate: 50 } ], status: "overdue" },
+    { id: "i3", jobId: "j2", clientId: "c2", number: "KTK-1006", dateIssued: addDays(-1), dueDate: addDays(13),
+      items: [ { desc: "Deck rebuild — labor", qty: 1, rate: 4800 }, { desc: "Cedar decking materials", qty: 1, rate: 1500 }, { desc: "Composite railing", qty: 1, rate: 500 } ], status: "sent" },
+    { id: "i4", jobId: "j1", clientId: "c1", number: "KTK-1007", dateIssued: todayISO(), dueDate: addDays(14),
+      items: [ { desc: "Backsplash tile — labor & materials", qty: 1, rate: 2400 } ], status: "draft" },
+  ];
+
+  return { clients, jobs, invoices };
+}
+
+/* ============================== SMALL UI PIECES ============================== */
+function Badge({ stage, children }) {
+  const map = { scheduled: "clock", in_progress: "zap", review: "alert-circle", complete: "check-circle", paid: "dollar",
+    draft: "edit", sent: "send", overdue: "alert-circle" };
+  return (
+    <span className={"badge badge-" + stage}>
+      <span className="badge-dot"></span>
+      {children}
+    </span>
+  );
+}
+const stageLabel = (k) => (STAGES.find(s => s.key === k) || {}).label || k;
+const invStatusLabel = (s) => ({ draft: "Draft", sent: "Sent", paid: "Paid", overdue: "Overdue" }[s] || s);
+
+function TopBar({ title, sub, onBack, right }) {
+  return (
+    <div className="topbar">
+      <div className="row" style={{gap:10, minWidth:0, flex:1}}>
+        {onBack && (
+          <button className="icon-btn" style={{flexShrink:0}} onClick={onBack} aria-label="Back">
+            <Icon name="arrow-left" size={17} />
+          </button>
+        )}
+        <div style={{minWidth:0}}>
+          <div className="topbar-title" style={{overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{title}</div>
+          {sub && <div className="topbar-sub">{sub}</div>}
+        </div>
+      </div>
+      <div className="row" style={{gap:8, flexShrink:0}}>{right}</div>
+    </div>
+  );
+}
+
+function Stepper({ stage }) {
+  const idx = stageIndex(stage);
+  const fillPct = idx <= 0 ? 0 : (idx / (STAGES.length - 1)) * 88;
+  return (
+    <div className="stepper">
+      <div className="stepper-track"></div>
+      <div className="stepper-track-fill" style={{ width: fillPct + "%" }}></div>
+      {STAGES.map((s, i) => {
+        const done = i < idx, current = i === idx;
+        return (
+          <div className="stepper-item" key={s.key}>
+            <div className={"stepper-dot " + (done ? "done" : current ? "current" : "")}>
+              <Icon name={done ? "check" : s.icon} size={14} />
+            </div>
+            <div className={"stepper-label " + (done ? "done" : current ? "current" : "")}>{s.label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Toasts({ toasts }) {
+  return (
+    <div className="toast-wrap">
+      {toasts.map(t => (
+        <div className="toast" key={t.id}>
+          <Icon name={t.icon || "check-circle"} size={15} />
+          {t.msg}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Sheet({ title, onClose, children }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+        <div className="modal-handle"></div>
+        <div className="row-between" style={{marginBottom: 14}}>
+          <div className="modal-title">{title}</div>
+          <button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" size={16} /></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function PhotoTile({ label, g, onClick }) {
+  return (
+    <div className="photo-tile" style={{ background: PHOTO_GRADIENTS[g % PHOTO_GRADIENTS.length] }} onClick={onClick}>
+      <Icon name="camera" size={20} />
+      <div className="photo-tile-label">{label}</div>
+    </div>
+  );
+}
+
+/* ============================== ONBOARDING ============================== */
+const ONBOARD_SLIDES = [
+  { icon: "briefcase", title: "Welcome to Kontrak", desc: "The simple way to manage your gigs — clients, jobs, and payments, all in one place." },
+  { icon: "camera", title: "Track every job", desc: "Snap progress photos and move jobs through clear stages, from scheduled to paid." },
+  { icon: "qr", title: "Get paid fast", desc: "Send automatic invoices and collect payment by QR code or Zelle — no chasing checks." },
+];
+
+function Onboarding({ onDone }) {
+  const [step, setStep] = useState(0);
+  const [setup, setSetup] = useState(false);
+  const [name, setName] = useState("");
+  const [trade, setTrade] = useState("General Contractor");
+
+  if (setup) {
+    return (
+      <div className="onboard-screen">
+        <div className="content" style={{paddingTop: 40}}>
+          <div className="eyebrow" style={{marginBottom:8}}>Quick setup</div>
+          <div className="onboard-title" style={{fontSize:"1.3em", textAlign:"left"}}>Tell us about your business</div>
+          <div className="onboard-desc" style={{textAlign:"left", margin: "6px 0 24px"}}>This shows up on your invoices and dashboard.</div>
+          <div className="form-group">
+            <label className="label">Your name</label>
+            <input className="input" placeholder="Jordan Reyes" value={name} onChange={e => setName(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="label">Trade</label>
+            <select className="select" value={trade} onChange={e => setTrade(e.target.value)}>
+              {["General Contractor","Electrician","Plumber","HVAC","Carpenter","Landscaper","Painter","Roofer","Handyman","Other"].map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="onboard-bottom">
+          <button className="btn btn-primary btn-block" onClick={() => onDone({ name: name.trim() || "Jordan Reyes", trade })}>
+            Enter Kontrak
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const s = ONBOARD_SLIDES[step];
+  return (
+    <div className="onboard-screen">
+      <div className="onboard-top">
+        {step < ONBOARD_SLIDES.length - 1 && (
+          <button className="btn btn-ghost btn-sm" onClick={() => setSetup(true)}>Skip</button>
+        )}
+      </div>
+      <div className="onboard-body">
+        <div className="onboard-icon"><Icon name={s.icon} size={40} /></div>
+        <div className="onboard-title">{s.title}</div>
+        <div className="onboard-desc">{s.desc}</div>
+        <div className="onboard-dots">
+          {ONBOARD_SLIDES.map((_, i) => <div key={i} className={"onboard-dot " + (i === step ? "active" : "")}></div>)}
+        </div>
+      </div>
+      <div className="onboard-bottom">
+        <button className="btn btn-primary btn-block" onClick={() => step < ONBOARD_SLIDES.length - 1 ? setStep(step+1) : setSetup(true)}>
+          {step < ONBOARD_SLIDES.length - 1 ? "Next" : "Get Started"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================== DASHBOARD ============================== */
+function Dashboard({ profile, jobs, clients, invoices, go, notify }) {
+  const [fabOpen, setFabOpen] = useState(false);
+  const activeJobs = jobs.filter(j => j.stage !== "paid");
+  const outstanding = invoices.filter(i => i.status === "sent" || i.status === "overdue")
+    .reduce((s,i) => s + i.items.reduce((a,li)=>a+li.qty*li.rate,0), 0);
+  const paidThisMonth = invoices.filter(i => i.status === "paid")
+    .reduce((s,i) => s + i.items.reduce((a,li)=>a+li.qty*li.rate,0), 0);
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const clientName = (id) => (clients.find(c => c.id === id) || {}).name || "Client";
+
+  return (
+    <div>
+      <div className="eyebrow">{new Date().toLocaleDateString("en-US",{weekday:"long", month:"long", day:"numeric"})}</div>
+      <div className="section-title" style={{marginTop:4, fontSize:"1.15em"}}>{greeting}, {profile.name.split(" ")[0]}</div>
+
+      <div className="stat-grid">
+        <div className="stat-card">
+          <div className="stat-value">{activeJobs.length}</div>
+          <div className="stat-label">Active jobs</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{currency(outstanding)}</div>
+          <div className="stat-label">Outstanding</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{currency(paidThisMonth)}</div>
+          <div className="stat-label">Paid recently</div>
+        </div>
+      </div>
+
+      <div className="dash-columns">
+        <div>
+          <div className="row-between">
+            <div className="section-title">Active jobs</div>
+            <button className="btn btn-ghost btn-sm" onClick={() => go("jobs")}>See all</button>
+          </div>
+          {activeJobs.length === 0 && <div className="card" style={{color:"var(--text-tertiary)", fontSize:"0.85em"}}>No active jobs. Create one to get started.</div>}
+          {activeJobs.slice(0,3).map(j => (
+            <button key={j.id} className="card card-tap" onClick={() => go("jobs", { jobId: j.id })}>
+              <div className="row-between">
+                <div className="stack" style={{gap:2}}>
+                  <div style={{fontWeight:600, fontSize:"0.92em"}}>{j.title}</div>
+                  <div style={{fontSize:"0.78em", color:"var(--text-tertiary)"}}>{clientName(j.clientId)}</div>
+                </div>
+                <Badge stage={j.stage}>{stageLabel(j.stage)}</Badge>
+              </div>
+              <div className="progress-mini"><div className="progress-mini-fill" style={{width: (stageIndex(j.stage)/(STAGES.length-1))*100 + "%"}}></div></div>
+            </button>
+          ))}
+        </div>
+
+        <div>
+          <div className="row-between">
+            <div className="section-title">Recent invoices</div>
+            <button className="btn btn-ghost btn-sm" onClick={() => go("pay")}>See all</button>
+          </div>
+          {invoices.slice(0,3).map(inv => {
+            const total = inv.items.reduce((a,li)=>a+li.qty*li.rate,0);
+            return (
+              <button key={inv.id} className="card card-tap" onClick={() => go("pay", { invoiceId: inv.id })}>
+                <div className="row-between">
+                  <div className="stack" style={{gap:2}}>
+                    <div style={{fontWeight:600, fontSize:"0.88em", fontFamily:"var(--font-mono)"}}>{inv.number}</div>
+                    <div style={{fontSize:"0.78em", color:"var(--text-tertiary)"}}>{clientName(inv.clientId)}</div>
+                  </div>
+                  <div className="stack" style={{alignItems:"flex-end", gap:4}}>
+                    <div style={{fontWeight:700, fontSize:"0.9em"}}>{currency(total)}</div>
+                    <Badge stage={inv.status}>{invStatusLabel(inv.status)}</Badge>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div style={{height: 8}}></div>
+
+      {fabOpen && <div className="fab-backdrop" onClick={()=>setFabOpen(false)}></div>}
+      <div className="fab-dial">
+        <button className="fab" onClick={()=>setFabOpen(o=>!o)} aria-label="Quick actions" aria-expanded={fabOpen}>
+          <Icon name={fabOpen ? "x" : "plus"} size={22} />
+        </button>
+        {fabOpen && (
+          <React.Fragment>
+            <button className="fab-menu-item" onClick={() => { setFabOpen(false); go("pay", { newInvoice: true }); }}>
+              New Invoice
+              <span className="fab-menu-icon"><Icon name="send" size={15}/></span>
+            </button>
+            <button className="fab-menu-item" onClick={() => { setFabOpen(false); go("jobs", { newJob: true }); }}>
+              New Job
+              <span className="fab-menu-icon"><Icon name="briefcase" size={15}/></span>
+            </button>
+          </React.Fragment>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================== CLIENTS ============================== */
+function ClientsScreen({ clients, jobs, invoices, go, params, onAddClient, notify }) {
+  const [search, setSearch] = useState("");
+  const [adding, setAdding] = useState(!!(params && params.newClient));
+  const [form, setForm] = useState({ name:"", company:"", phone:"", email:"", address:"" });
+
+  if (params && params.clientId) {
+    return <ClientDetail client={clients.find(c=>c.id===params.clientId)} jobs={jobs} invoices={invoices} go={go} />;
+  }
+
+  const filtered = clients.filter(c => (c.name + c.company).toLowerCase().includes(search.toLowerCase()));
+  const jobsCount = (id) => jobs.filter(j => j.clientId === id).length;
+  const totalBilled = (id) => invoices.filter(i => i.clientId === id && i.status === "paid").reduce((s,i)=>s+i.items.reduce((a,li)=>a+li.qty*li.rate,0),0);
+
+  const submit = () => {
+    if (!form.name.trim()) return;
+    onAddClient({ id: uid("c"), ...form });
+    notify("Client added", "check-circle");
+    setAdding(false);
+    setForm({ name:"", company:"", phone:"", email:"", address:"" });
+  };
+
+  return (
+    <div>
+      <div className="search-bar">
+        <Icon name="search" size={16} className="dim" style={{color:"var(--text-tertiary)"}} />
+        <input placeholder="Search clients" value={search} onChange={e=>setSearch(e.target.value)} aria-label="Search clients" />
+      </div>
+      {filtered.length === 0 && (
+        <div className="empty-state">
+          <div className="icon-btn"><Icon name="users" size={22} /></div>
+          <div style={{fontWeight:600, color:"var(--text)"}}>No clients yet</div>
+          <div style={{fontSize:"0.82em", marginTop:4}}>Add your first client to start a job.</div>
+        </div>
+      )}
+      <div className="grid-list">
+      {filtered.map(c => (
+        <button key={c.id} className="card card-tap" onClick={() => go("clients", { clientId: c.id })}>
+          <div className="row" style={{gap:12}}>
+            <div className="avatar">{initials(c.name)}</div>
+            <div className="stack" style={{gap:2, flex:1, minWidth:0}}>
+              <div style={{fontWeight:600, fontSize:"0.92em"}}>{c.name}</div>
+              <div style={{fontSize:"0.78em", color:"var(--text-tertiary)"}}>{c.company}</div>
+            </div>
+            <div className="stack" style={{alignItems:"flex-end", gap:2}}>
+              <div style={{fontSize:"0.78em", fontWeight:700}}>{jobsCount(c.id)} job{jobsCount(c.id)!==1?"s":""}</div>
+              <div style={{fontSize:"0.72em", color:"var(--text-tertiary)"}}>{currency(totalBilled(c.id))} billed</div>
+            </div>
+            <Icon name="chevron-right" size={16} style={{color:"var(--text-tertiary)"}} />
+          </div>
+        </button>
+      ))}
+      </div>
+
+      <button className="fab" onClick={() => setAdding(true)} aria-label="Add client"><Icon name="plus" size={22} /></button>
+
+      {adding && (
+        <Sheet title="New client" onClose={() => setAdding(false)}>
+          <div className="form-group"><label className="label">Full name</label><input className="input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Jane Kim" /></div>
+          <div className="form-group"><label className="label">Company / property</label><input className="input" value={form.company} onChange={e=>setForm({...form,company:e.target.value})} placeholder="Kim Residence" /></div>
+          <div className="input-row form-group">
+            <div><label className="label">Phone</label><input className="input" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="(555) 555-0100" /></div>
+            <div><label className="label">Email</label><input className="input" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="jane@email.com" /></div>
+          </div>
+          <div className="form-group"><label className="label">Address</label><input className="input" value={form.address} onChange={e=>setForm({...form,address:e.target.value})} placeholder="123 Main St, City, CA" /></div>
+          <button className="btn btn-primary btn-block" onClick={submit}>Add client</button>
+        </Sheet>
+      )}
+    </div>
+  );
+}
+
+function ClientDetail({ client, jobs, invoices, go }) {
+  if (!client) return null;
+  const cJobs = jobs.filter(j => j.clientId === client.id);
+  const totalBilled = invoices.filter(i => i.clientId === client.id && i.status === "paid").reduce((s,i)=>s+i.items.reduce((a,li)=>a+li.qty*li.rate,0),0);
+  return (
+    <div className="client-detail-grid">
+      <div className="col-main">
+        <div className="card" style={{textAlign:"center", padding:"22px 14px"}}>
+          <div className="avatar avatar-lg" style={{margin:"0 auto 10px"}}>{initials(client.name)}</div>
+          <div style={{fontWeight:700, fontSize:"1.1em", fontFamily:"var(--font-display)"}}>{client.name}</div>
+          <div style={{color:"var(--text-tertiary)", fontSize:"0.84em", marginTop:2}}>{client.company}</div>
+        </div>
+
+        <div className="card">
+          <div className="row" style={{gap:10, padding:"6px 0"}}><Icon name="phone" size={15} style={{color:"var(--text-tertiary)"}}/><span style={{fontSize:"0.86em"}}>{client.phone || "—"}</span></div>
+          <div className="row" style={{gap:10, padding:"6px 0"}}><Icon name="mail" size={15} style={{color:"var(--text-tertiary)"}}/><span style={{fontSize:"0.86em"}}>{client.email || "—"}</span></div>
+          <div className="row" style={{gap:10, padding:"6px 0"}}><Icon name="map-pin" size={15} style={{color:"var(--text-tertiary)"}}/><span style={{fontSize:"0.86em"}}>{client.address || "—"}</span></div>
+        </div>
+      </div>
+
+      <div className="col-side">
+        <div className="stat-grid" style={{gridTemplateColumns:"1fr 1fr", marginTop:10}}>
+          <div className="stat-card"><div className="stat-value">{cJobs.length}</div><div className="stat-label">Total jobs</div></div>
+          <div className="stat-card"><div className="stat-value">{currency(totalBilled)}</div><div className="stat-label">Total billed</div></div>
+        </div>
+
+        <div className="section-title">Jobs</div>
+        <div className="grid-list">
+        {cJobs.map(j => (
+          <button key={j.id} className="card card-tap" onClick={() => go("jobs", { jobId: j.id })}>
+            <div className="row-between">
+              <div style={{fontWeight:600, fontSize:"0.9em"}}>{j.title}</div>
+              <Badge stage={j.stage}>{stageLabel(j.stage)}</Badge>
+            </div>
+          </button>
+        ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================== JOBS ============================== */
+const JOB_FILTERS = [{key:"all",label:"All"}, ...STAGES.map(s=>({key:s.key,label:s.label}))];
+
+function JobsScreen({ jobs, clients, invoices, go, params, onAddJob, onUpdateJob, notify }) {
+  const [filter, setFilter] = useState("all");
+  const [adding, setAdding] = useState(!!(params && params.newJob));
+
+  if (params && params.jobId) {
+    return <JobDetail job={jobs.find(j=>j.id===params.jobId)} clients={clients} invoices={invoices} go={go} onUpdateJob={onUpdateJob} notify={notify} />;
+  }
+
+  const clientName = (id) => (clients.find(c => c.id === id) || {}).name || "Client";
+  const filtered = filter === "all" ? jobs : jobs.filter(j => j.stage === filter);
+
+  return (
+    <div>
+      <div className="chip-row">
+        {JOB_FILTERS.map(f => (
+          <button key={f.key} className={"chip " + (filter===f.key ? "active":"")} onClick={()=>setFilter(f.key)}>{f.label}</button>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="empty-state">
+          <div className="icon-btn"><Icon name="briefcase" size={22} /></div>
+          <div style={{fontWeight:600, color:"var(--text)"}}>No jobs here</div>
+          <div style={{fontSize:"0.82em", marginTop:4}}>Try a different filter or add a new job.</div>
+        </div>
+      )}
+
+      <div className="grid-list">
+      {filtered.map(j => (
+        <button key={j.id} className="card card-tap" onClick={() => go("jobs", { jobId: j.id })}>
+          <div className="row-between">
+            <div className="stack" style={{gap:2, minWidth:0}}>
+              <div style={{fontWeight:600, fontSize:"0.92em"}}>{j.title}</div>
+              <div style={{fontSize:"0.78em", color:"var(--text-tertiary)"}}>{clientName(j.clientId)} · due {shortDate(j.dueDate)}</div>
+            </div>
+            <div className="stack" style={{alignItems:"flex-end", gap:4}}>
+              <div style={{fontWeight:700, fontSize:"0.88em", fontFamily:"var(--font-mono)"}}>{currency(j.amount)}</div>
+              <Badge stage={j.stage}>{stageLabel(j.stage)}</Badge>
+            </div>
+          </div>
+        </button>
+      ))}
+      </div>
+
+      <button className="fab" onClick={()=>setAdding(true)} aria-label="Add job"><Icon name="plus" size={22} /></button>
+
+      {adding && <NewJobSheet clients={clients} onClose={()=>setAdding(false)} onSave={(j)=>{ onAddJob(j); setAdding(false); notify("Job created", "check-circle"); }} />}
+    </div>
+  );
+}
+
+function NewJobSheet({ clients, onClose, onSave }) {
+  const [title, setTitle] = useState("");
+  const [clientId, setClientId] = useState(clients[0] ? clients[0].id : "");
+  const [address, setAddress] = useState("");
+  const [amount, setAmount] = useState("");
+  const [dueDate, setDueDate] = useState(addDays(7));
+  const [notes, setNotes] = useState("");
+
+  const submit = () => {
+    if (!title.trim() || !clientId) return;
+    onSave({
+      id: uid("j"), clientId, title: title.trim(), address, amount: Number(amount) || 0,
+      startDate: todayISO(), dueDate, stage: "scheduled", notes, photos: [], files: []
+    });
+  };
+
+  return (
+    <Sheet title="New job" onClose={onClose}>
+      <div className="form-group"><label className="label">Job title</label><input className="input" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Kitchen backsplash retile" /></div>
+      <div className="form-group">
+        <label className="label">Client</label>
+        <select className="select" value={clientId} onChange={e=>setClientId(e.target.value)}>
+          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+      <div className="form-group"><label className="label">Job address</label><input className="input" value={address} onChange={e=>setAddress(e.target.value)} placeholder="123 Main St, City, CA" /></div>
+      <div className="input-row form-group">
+        <div><label className="label">Estimated amount</label><input className="input" type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="2400" /></div>
+        <div><label className="label">Due date</label><input className="input" type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)} /></div>
+      </div>
+      <div className="form-group"><label className="label">Notes</label><textarea className="textarea" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Scope, materials, special instructions…" /></div>
+      <button className="btn btn-primary btn-block" onClick={submit}>Create job</button>
+    </Sheet>
+  );
+}
+
+function JobDetail({ job, clients, invoices, go, onUpdateJob, notify }) {
+  const [stageSheet, setStageSheet] = useState(false);
+  const [notes, setNotes] = useState(job ? job.notes : "");
+  const [photoPrompt, setPhotoPrompt] = useState(false);
+  if (!job) return null;
+  const client = clients.find(c => c.id === job.clientId);
+  const hasInvoice = invoices.some(i => i.jobId === job.id);
+
+  const setStage = (key) => {
+    onUpdateJob(job.id, { stage: key });
+    setStageSheet(false);
+    notify("Stage updated to " + stageLabel(key), "check-circle");
+  };
+
+  const addPhoto = (label) => {
+    const g = Math.floor(Math.random() * PHOTO_GRADIENTS.length);
+    onUpdateJob(job.id, { photos: [...job.photos, { id: uid("p"), label, g }] });
+    setPhotoPrompt(false);
+    notify("Photo added", "camera");
+  };
+
+  const addFile = () => {
+    const names = ["Site-notes.pdf", "Material-list.pdf", "Client-signoff.pdf", "Measurements.pdf"];
+    const name = names[Math.floor(Math.random()*names.length)];
+    onUpdateJob(job.id, { files: [...job.files, { id: uid("f"), name, size: (Math.round(Math.random()*900)+100)+" KB" }] });
+    notify("File attached", "file");
+  };
+
+  const saveNotes = () => onUpdateJob(job.id, { notes });
+
+  return (
+    <div>
+      <div className="stack" style={{gap:4, marginBottom: 14}}>
+        <div style={{fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1.15em"}}>{job.title}</div>
+        <button className="row" style={{gap:6, background:"none", border:"none", padding:0, color:"var(--text-secondary)", fontSize:"0.84em", width:"fit-content"}}
+          onClick={() => go("clients", { clientId: job.clientId })}>
+          <Icon name="users" size={13}/> {client ? client.name : "Client"}
+        </button>
+        <div className="row" style={{gap:6, color:"var(--text-tertiary)", fontSize:"0.8em"}}>
+          <Icon name="map-pin" size={13}/> {job.address || "No address"}
+        </div>
+      </div>
+
+      <div className="job-detail-grid">
+        <div className="col-main">
+          <div className="row" style={{gap:8, marginBottom: 16}}>
+            <div className="card" style={{flex:1, padding:"10px 12px"}}>
+              <div style={{fontSize:"0.68em", color:"var(--text-tertiary)", fontWeight:600}}>AMOUNT</div>
+              <div style={{fontWeight:700, fontFamily:"var(--font-mono)"}}>{currency(job.amount)}</div>
+            </div>
+            <div className="card" style={{flex:1, padding:"10px 12px"}}>
+              <div style={{fontSize:"0.68em", color:"var(--text-tertiary)", fontWeight:600}}>DUE</div>
+              <div style={{fontWeight:700}}>{shortDate(job.dueDate)}</div>
+            </div>
+          </div>
+
+          <div className="card">
+            <Stepper stage={job.stage} />
+            <div style={{marginTop: 14, textAlign:"center"}}>
+              <div className="stamp"><Icon name={STAGES[stageIndex(job.stage)].icon} size={13}/>{stageLabel(job.stage)}</div>
+            </div>
+            <button className="btn btn-secondary btn-block" style={{marginTop:14}} onClick={()=>setStageSheet(true)}>Update stage</button>
+          </div>
+
+          <div className="section-title">Notes</div>
+          <div className="card">
+            <textarea className="textarea" value={notes} onChange={e=>setNotes(e.target.value)} onBlur={saveNotes} placeholder="Scope, materials, special instructions…" />
+          </div>
+
+          <div style={{marginTop: 16}}>
+            {hasInvoice ? (
+              <button className="btn btn-secondary btn-block" onClick={() => go("pay")}><Icon name="wallet" size={15}/>View invoice</button>
+            ) : (
+              <button className="btn btn-primary btn-block" onClick={() => go("pay", { newInvoice: true, jobId: job.id })}>
+                <Icon name="send" size={15}/>Create invoice
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="col-side">
+          <div className="row-between">
+            <div className="section-title">Photos</div>
+            <button className="btn btn-ghost btn-sm" onClick={()=>setPhotoPrompt(true)}><Icon name="plus" size={13}/>Add</button>
+          </div>
+          {job.photos.length === 0 ? (
+            <div className="card" style={{color:"var(--text-tertiary)", fontSize:"0.84em"}}>No photos yet. Add before/progress/after shots to document the work.</div>
+          ) : (
+            <div className="photo-grid">
+              {job.photos.map(p => <PhotoTile key={p.id} label={p.label} g={p.g} />)}
+            </div>
+          )}
+
+          <div className="row-between">
+            <div className="section-title">Files</div>
+            <button className="btn btn-ghost btn-sm" onClick={addFile}><Icon name="plus" size={13}/>Add</button>
+          </div>
+          <div className="card" style={{padding: "4px 10px"}}>
+            {job.files.length === 0 && <div style={{color:"var(--text-tertiary)", fontSize:"0.84em", padding:"10px 4px"}}>No files attached.</div>}
+            {job.files.map(f => (
+              <div className="file-row" key={f.id}>
+                <div className="file-icon"><Icon name="file" size={16}/></div>
+                <div className="stack" style={{gap:1, flex:1}}>
+                  <div style={{fontSize:"0.85em", fontWeight:600}}>{f.name}</div>
+                  <div style={{fontSize:"0.72em", color:"var(--text-tertiary)"}}>{f.size}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div style={{height:10}}></div>
+
+      {stageSheet && (
+        <Sheet title="Update stage" onClose={()=>setStageSheet(false)}>
+          <div className="stack" style={{gap:8}}>
+            {STAGES.map(s => (
+              <button key={s.key} className="card card-tap row-between" onClick={()=>setStage(s.key)}>
+                <div className="row" style={{gap:10}}>
+                  <Icon name={s.icon} size={16} style={{color: s.key===job.stage ? "var(--accent)":"var(--text-tertiary)"}}/>
+                  <span style={{fontWeight:600, fontSize:"0.9em"}}>{s.label}</span>
+                </div>
+                {s.key === job.stage && <Icon name="check" size={15} style={{color:"var(--accent)"}}/>}
+              </button>
+            ))}
+          </div>
+        </Sheet>
+      )}
+
+      {photoPrompt && (
+        <Sheet title="Add photo" onClose={()=>setPhotoPrompt(false)}>
+          <div style={{fontSize:"0.84em", color:"var(--text-secondary)", marginBottom:14}}>Tag this photo so it's easy to find later.</div>
+          <div className="stack" style={{gap:8}}>
+            {["Before","Progress","After","Proof of completion"].map(label => (
+              <button key={label} className="btn btn-secondary btn-block" onClick={()=>addPhoto(label)}>
+                <Icon name="camera" size={15}/>{label}
+              </button>
+            ))}
+          </div>
+        </Sheet>
+      )}
+    </div>
+  );
+}
+
+/* ============================== PAY / INVOICES ============================== */
+const INV_FILTERS = [{key:"all",label:"All"},{key:"draft",label:"Draft"},{key:"sent",label:"Sent"},{key:"paid",label:"Paid"},{key:"overdue",label:"Overdue"}];
+
+function PayScreen({ invoices, jobs, clients, profile, go, params, onAddInvoice, onUpdateInvoice, notify }) {
+  const [filter, setFilter] = useState("all");
+  const [creating, setCreating] = useState(!!(params && params.newInvoice));
+
+  if (params && params.invoiceId) {
+    return <InvoiceDetail invoice={invoices.find(i=>i.id===params.invoiceId)} jobs={jobs} clients={clients} profile={profile}
+      onUpdateInvoice={onUpdateInvoice} notify={notify} go={go} />;
+  }
+
+  const clientName = (id) => (clients.find(c=>c.id===id)||{}).name || "Client";
+  const jobTitle = (id) => (jobs.find(j=>j.id===id)||{}).title || "Job";
+  const total = (inv) => inv.items.reduce((a,li)=>a+li.qty*li.rate,0);
+  const filtered = filter === "all" ? invoices : invoices.filter(i=>i.status===filter);
+  const outstanding = invoices.filter(i=>i.status==="sent"||i.status==="overdue").reduce((s,i)=>s+total(i),0);
+  const paid = invoices.filter(i=>i.status==="paid").reduce((s,i)=>s+total(i),0);
+
+  return (
+    <div>
+      <div className="stat-grid" style={{gridTemplateColumns:"1fr 1fr"}}>
+        <div className="stat-card"><div className="stat-value">{currency(outstanding)}</div><div className="stat-label">Outstanding</div></div>
+        <div className="stat-card"><div className="stat-value">{currency(paid)}</div><div className="stat-label">Collected</div></div>
+      </div>
+
+      <div className="chip-row" style={{marginTop:14}}>
+        {INV_FILTERS.map(f => <button key={f.key} className={"chip " + (filter===f.key?"active":"")} onClick={()=>setFilter(f.key)}>{f.label}</button>)}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="empty-state">
+          <div className="icon-btn"><Icon name="wallet" size={22} /></div>
+          <div style={{fontWeight:600, color:"var(--text)"}}>No invoices here</div>
+          <div style={{fontSize:"0.82em", marginTop:4}}>Create one from a job to get paid faster.</div>
+        </div>
+      )}
+
+      <div className="grid-list">
+      {filtered.map(inv => (
+        <div className="ticket" key={inv.id} style={{marginBottom:10}}>
+          <button className="card-tap" style={{width:"100%", background:"none", border:"none", textAlign:"left"}} onClick={()=>go("pay",{invoiceId:inv.id})}>
+            <div className="ticket-body" style={{paddingBottom:12}}>
+              <div className="row-between">
+                <div style={{fontFamily:"var(--font-mono)", fontWeight:700, fontSize:"0.86em"}}>{inv.number}</div>
+                <Badge stage={inv.status}>{invStatusLabel(inv.status)}</Badge>
+              </div>
+              <div style={{fontSize:"0.8em", color:"var(--text-tertiary)", marginTop:4}}>{clientName(inv.clientId)} · {jobTitle(inv.jobId)}</div>
+              <div className="row-between" style={{marginTop:10}}>
+                <div style={{fontSize:"0.74em", color:"var(--text-tertiary)"}}>Due {shortDate(inv.dueDate)}</div>
+                <div style={{fontWeight:700, fontFamily:"var(--font-mono)"}}>{currency2(total(inv))}</div>
+              </div>
+            </div>
+          </button>
+        </div>
+      ))}
+      </div>
+
+      <button className="fab" onClick={()=>setCreating(true)} aria-label="New invoice"><Icon name="plus" size={22} /></button>
+
+      {creating && (
+        <NewInvoiceFlow jobs={jobs} clients={clients} invoices={invoices} presetJobId={params && params.jobId}
+          onClose={()=>setCreating(false)}
+          onSave={(inv)=>{ onAddInvoice(inv); setCreating(false); notify("Invoice sent", "send"); go("pay",{invoiceId: inv.id}); }} />
+      )}
+    </div>
+  );
+}
+
+function NewInvoiceFlow({ jobs, clients, invoices, presetJobId, onClose, onSave }) {
+  const uninvoicedJobs = jobs.filter(j => !invoices.some(i=>i.jobId===j.id));
+  const [step, setStep] = useState(1);
+  const [jobId, setJobId] = useState(presetJobId || (uninvoicedJobs[0] && uninvoicedJobs[0].id) || "");
+  const job = jobs.find(j=>j.id===jobId);
+  const client = job ? clients.find(c=>c.id===job.clientId) : null;
+  const [items, setItems] = useState([]);
+  const [dueDate, setDueDate] = useState(addDays(14));
+
+  useEffect(() => {
+    if (job) setItems([{ desc: job.title + " — labor & materials", qty: 1, rate: job.amount || 0 }]);
+  }, [jobId]);
+
+  const total = items.reduce((a,li)=>a + (Number(li.qty)||0)*(Number(li.rate)||0), 0);
+  const updateItem = (i, key, val) => setItems(items.map((li,idx)=> idx===i ? {...li, [key]: val} : li));
+  const addLine = () => setItems([...items, { desc:"", qty:1, rate:0 }]);
+  const removeLine = (i) => setItems(items.filter((_,idx)=>idx!==i));
+
+  const submit = () => {
+    onSave({
+      id: uid("i"), jobId, clientId: job.clientId,
+      number: "KTK-" + (1000 + Math.floor(Math.random()*899) + 8),
+      dateIssued: todayISO(), dueDate, items, status: "sent"
+    });
+  };
+
+  return (
+    <Sheet title={"New invoice · Step " + step + " of 3"} onClose={onClose}>
+      {step === 1 && (
+        <div>
+          <div className="label" style={{marginBottom:10}}>Select a job to invoice</div>
+          {jobs.length === 0 && <div style={{fontSize:"0.85em", color:"var(--text-tertiary)"}}>No jobs yet — create a job first.</div>}
+          <div className="stack" style={{gap:8, maxHeight: 320, overflowY:"auto"}}>
+            {jobs.map(j => {
+              const c = clients.find(x=>x.id===j.clientId);
+              return (
+                <button key={j.id} className="card card-tap row-between" onClick={()=>setJobId(j.id)}>
+                  <div className="stack" style={{gap:2}}>
+                    <div style={{fontWeight:600, fontSize:"0.88em"}}>{j.title}</div>
+                    <div style={{fontSize:"0.76em", color:"var(--text-tertiary)"}}>{c ? c.name : ""} · {currency(j.amount)}</div>
+                  </div>
+                  {jobId === j.id && <Icon name="check" size={15} style={{color:"var(--accent)"}}/>}
+                </button>
+              );
+            })}
+          </div>
+          <button className="btn btn-primary btn-block" style={{marginTop:16}} disabled={!jobId} onClick={()=>setStep(2)}>Continue</button>
+        </div>
+      )}
+
+      {step === 2 && job && (
+        <div>
+          <div className="label" style={{marginBottom:8}}>Line items</div>
+          {items.map((li, i) => (
+            <div className="card" key={i} style={{marginBottom:8}}>
+              <input className="input" placeholder="Description" value={li.desc} onChange={e=>updateItem(i,"desc",e.target.value)} style={{marginBottom:8}} />
+              <div className="input-row" style={{alignItems:"center"}}>
+                <div><label className="label">Qty</label><input className="input" type="number" value={li.qty} onChange={e=>updateItem(i,"qty",e.target.value)} /></div>
+                <div><label className="label">Rate</label><input className="input" type="number" value={li.rate} onChange={e=>updateItem(i,"rate",e.target.value)} /></div>
+                <button className="icon-btn" style={{marginTop:18}} onClick={()=>removeLine(i)} aria-label="Remove line"><Icon name="trash" size={14}/></button>
+              </div>
+            </div>
+          ))}
+          <button className="btn btn-secondary btn-block" onClick={addLine}><Icon name="plus" size={14}/>Add line item</button>
+          <div className="form-group" style={{marginTop:14}}>
+            <label className="label">Due date</label>
+            <input className="input" type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)} />
+          </div>
+          <div className="divider"></div>
+          <div className="row-between" style={{fontWeight:700, marginBottom:14}}>
+            <span>Total</span><span style={{fontFamily:"var(--font-mono)"}}>{currency2(total)}</span>
+          </div>
+          <div className="row" style={{gap:8}}>
+            <button className="btn btn-secondary" style={{flex:1}} onClick={()=>setStep(1)}>Back</button>
+            <button className="btn btn-primary" style={{flex:2}} onClick={()=>setStep(3)}>Review</button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && job && (
+        <div>
+          <div className="ticket">
+            <div className="ticket-body">
+              <div className="row-between">
+                <div className="eyebrow">Invoice preview</div>
+                <span style={{fontFamily:"var(--font-mono)", fontSize:"0.8em"}}>Due {shortDate(dueDate)}</span>
+              </div>
+              <div style={{fontWeight:700, fontFamily:"var(--font-display)", fontSize:"1.05em", margin:"6px 0 2px"}}>{client.name}</div>
+              <div style={{fontSize:"0.78em", color:"var(--text-tertiary)"}}>{job.title}</div>
+              <div className="ticket-dash"></div>
+              {items.map((li,i)=>(
+                <div className="row-between" key={i} style={{fontSize:"0.82em", marginBottom:6}}>
+                  <span style={{color:"var(--text-secondary)"}}>{li.desc || "—"} × {li.qty}</span>
+                  <span style={{fontFamily:"var(--font-mono)"}}>{currency2((Number(li.qty)||0)*(Number(li.rate)||0))}</span>
+                </div>
+              ))}
+              <div className="ticket-dash"></div>
+              <div className="row-between" style={{fontWeight:700}}>
+                <span>Total due</span><span style={{fontFamily:"var(--font-mono)"}}>{currency2(total)}</span>
+              </div>
+            </div>
+          </div>
+          <div className="row" style={{gap:8, marginTop:16}}>
+            <button className="btn btn-secondary" style={{flex:1}} onClick={()=>setStep(2)}>Back</button>
+            <button className="btn btn-primary" style={{flex:2}} onClick={submit}><Icon name="send" size={14}/>Send invoice</button>
+          </div>
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+function InvoiceDetail({ invoice, jobs, clients, profile, onUpdateInvoice, notify, go }) {
+  const [payTab, setPayTab] = useState("qr");
+  const qrRef = useRef(null);
+  if (!invoice) return null;
+  const job = jobs.find(j=>j.id===invoice.jobId);
+  const client = clients.find(c=>c.id===invoice.clientId);
+  const total = invoice.items.reduce((a,li)=>a+li.qty*li.rate,0);
+
+  useEffect(() => {
+    if (payTab === "qr" && qrRef.current && window.QRCode) {
+      qrRef.current.innerHTML = "";
+      const payload = "zelle:" + (profile.zelle || "you@kontrak.app") + "?amount=" + total + "&memo=" + invoice.number;
+      window.QRCode.toCanvas(payload, { width: 148, margin: 0, color: { dark: "#1a1a1a", light: "#ffffff" } }, (err, canvas) => {
+        if (!err && qrRef.current) qrRef.current.appendChild(canvas);
+      });
+    }
+  }, [payTab, invoice.id]);
+
+  const markPaid = () => { onUpdateInvoice(invoice.id, { status: "paid", paidDate: todayISO() }); notify("Marked as paid", "check-circle"); };
+  const sendInvoice = () => { onUpdateInvoice(invoice.id, { status: "sent" }); notify("Invoice sent", "send"); };
+  const remind = () => notify("Reminder sent to " + (client ? client.name : "client"), "bell");
+
+  const buildPDF = () => {
+    if (!window.jspdf) return null;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const M = 54, W = 612 - M * 2;
+    const ACCENT = "#c1613f", INK = "#22201c", MUTE = "#8a867c", LINE = "#e4e0d4";
+    let y = M;
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(INK);
+    doc.text("KONTRAK", M, y + 6);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(MUTE);
+    doc.text((profile.business || profile.name || "").toUpperCase(), M, y + 20);
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.setTextColor(ACCENT);
+    doc.text("INVOICE", M + W, y + 8, { align: "right" });
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(MUTE);
+    doc.text(invoice.number, M + W, y + 22, { align: "right" });
+
+    y += 40;
+    doc.setDrawColor(ACCENT); doc.setLineWidth(2); doc.line(M, y, M + W, y);
+    y += 26;
+
+    const colW = W / 2 - 10;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(MUTE);
+    doc.text("BILLED TO", M, y);
+    doc.text("INVOICE DETAILS", M + colW + 20, y);
+    y += 14;
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(INK);
+    doc.text((client && client.name) || "—", M, y);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(MUTE);
+    let cy = y + 14;
+    if (client && client.address) { doc.text(doc.splitTextToSize(client.address, colW), M, cy); cy += 12; }
+    if (client && client.email) { doc.text(client.email, M, cy); cy += 12; }
+    if (client && client.phone) { doc.text(client.phone, M, cy); cy += 12; }
+
+    const dCol = M + colW + 20;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(INK);
+    doc.text("Job", dCol, y); doc.setTextColor(MUTE); doc.text(job ? job.title : "—", dCol + 70, y);
+    doc.setTextColor(INK); doc.text("Issued", dCol, y + 14); doc.setTextColor(MUTE); doc.text(longDate(invoice.dateIssued), dCol + 70, y + 14);
+    doc.setTextColor(INK); doc.text("Due", dCol, y + 28); doc.setTextColor(MUTE); doc.text(longDate(invoice.dueDate), dCol + 70, y + 28);
+    doc.setTextColor(INK); doc.text("Status", dCol, y + 42); doc.setTextColor(ACCENT); doc.text(invStatusLabel(invoice.status).toUpperCase(), dCol + 70, y + 42);
+
+    y += 70;
+    doc.setFillColor(246, 244, 238); doc.rect(M, y, W, 22, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(MUTE);
+    doc.text("DESCRIPTION", M + 8, y + 14);
+    doc.text("QTY", M + W - 190, y + 14, { align: "right" });
+    doc.text("RATE", M + W - 100, y + 14, { align: "right" });
+    doc.text("AMOUNT", M + W - 8, y + 14, { align: "right" });
+    y += 22;
+
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(INK);
+    invoice.items.forEach((li, i) => {
+      const rowH = 22;
+      if (i % 2 === 1) { doc.setFillColor(251, 250, 246); doc.rect(M, y, W, rowH, "F"); }
+      doc.setTextColor(INK);
+      doc.text(doc.splitTextToSize(li.desc || "—", W - 210), M + 8, y + 14);
+      doc.setTextColor(MUTE);
+      doc.text(String(li.qty), M + W - 190, y + 14, { align: "right" });
+      doc.text(currency2(li.rate), M + W - 100, y + 14, { align: "right" });
+      doc.setTextColor(INK);
+      doc.text(currency2(li.qty * li.rate), M + W - 8, y + 14, { align: "right" });
+      y += rowH;
+    });
+
+    y += 6;
+    doc.setDrawColor(LINE); doc.setLineWidth(1); doc.line(M, y, M + W, y);
+    y += 24;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(INK);
+    doc.text("Total due", M, y);
+    doc.setFontSize(15); doc.setTextColor(ACCENT);
+    doc.text(currency2(total), M + W - 8, y, { align: "right" });
+
+    y += 40;
+    doc.setDrawColor(LINE); doc.line(M, y, M + W, y);
+    y += 20;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(MUTE);
+    doc.text("PAYMENT", M, y);
+    y += 14;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(INK);
+    doc.text("Zelle: " + (profile.zelle || "—"), M, y);
+
+    if (invoice.status === "paid") {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(46); doc.setTextColor(139, 171, 108);
+      doc.text("PAID", 306, 380, { align: "center", angle: 18 });
+    }
+
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(MUTE);
+    doc.text("Generated with Kontrak", M, 760);
+
+    return doc;
+  };
+
+  const downloadPDF = () => {
+    const doc = buildPDF();
+    if (!doc) { notify("PDF library unavailable", "alert-circle"); return; }
+    doc.save(invoice.number + ".pdf");
+    notify("PDF downloaded", "download");
+  };
+
+  const emailInvoice = () => {
+    const doc = buildPDF();
+    if (doc) doc.save(invoice.number + ".pdf");
+    const firstName = client && client.name ? client.name.split(" ")[0] : "";
+    const subject = "Invoice " + invoice.number + " from " + (profile.business || profile.name);
+    const body = "Hi " + firstName + ",\n\nPlease find attached invoice " + invoice.number +
+      " for " + (job ? job.title : "your project") + " — total " + currency2(total) +
+      ", due " + longDate(invoice.dueDate) + ".\n\nYou can pay via Zelle to " + (profile.zelle || "") +
+      ".\n\nThanks,\n" + profile.name;
+    const mailto = "mailto:" + encodeURIComponent((client && client.email) || "") +
+      "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    window.open(mailto, "_blank");
+    notify("Email draft opened — attach the PDF", "mail");
+  };
+
+  return (
+    <div className="detail-narrow">
+      <div className="ticket">
+        <div className="ticket-body">
+          <div className="row-between">
+            <div>
+              <div className="eyebrow">Invoice</div>
+              <div style={{fontFamily:"var(--font-mono)", fontWeight:700, fontSize:"1.05em"}}>{invoice.number}</div>
+            </div>
+            <Badge stage={invoice.status}>{invStatusLabel(invoice.status)}</Badge>
+          </div>
+          <div className="ticket-dash"></div>
+          <div className="row-between" style={{fontSize:"0.82em", marginBottom:6}}>
+            <span style={{color:"var(--text-tertiary)"}}>Billed to</span>
+            <span style={{fontWeight:600}}>{client ? client.name : "—"}</span>
+          </div>
+          <div className="row-between" style={{fontSize:"0.82em", marginBottom:6}}>
+            <span style={{color:"var(--text-tertiary)"}}>Job</span>
+            <span style={{fontWeight:600}}>{job ? job.title : "—"}</span>
+          </div>
+          <div className="row-between" style={{fontSize:"0.82em"}}>
+            <span style={{color:"var(--text-tertiary)"}}>Issued / Due</span>
+            <span>{shortDate(invoice.dateIssued)} → {shortDate(invoice.dueDate)}</span>
+          </div>
+          <div className="ticket-dash"></div>
+          {invoice.items.map((li,i)=>(
+            <div className="row-between" key={i} style={{fontSize:"0.85em", marginBottom:7}}>
+              <span style={{color:"var(--text-secondary)"}}>{li.desc} {li.qty>1 ? "× "+li.qty : ""}</span>
+              <span style={{fontFamily:"var(--font-mono)"}}>{currency2(li.qty*li.rate)}</span>
+            </div>
+          ))}
+          <div className="ticket-dash"></div>
+          <div className="row-between" style={{fontWeight:700, fontSize:"1.05em"}}>
+            <span>Total</span><span style={{fontFamily:"var(--font-mono)"}}>{currency2(total)}</span>
+          </div>
+        </div>
+        <div className="ticket-perf"></div>
+      </div>
+
+      <div className="row" style={{gap:8, marginTop:12}}>
+        <button className="btn btn-secondary" style={{flex:1}} onClick={downloadPDF}><Icon name="download" size={14}/>Download PDF</button>
+        <button className="btn btn-secondary" style={{flex:1}} onClick={emailInvoice}><Icon name="mail" size={14}/>Email invoice</button>
+      </div>
+
+      {invoice.status === "draft" && (
+        <button className="btn btn-primary btn-block" style={{marginTop:16}} onClick={sendInvoice}><Icon name="send" size={15}/>Send invoice</button>
+      )}
+
+      {(invoice.status === "sent" || invoice.status === "overdue") && (
+        <div>
+          <div className="section-title">Collect payment</div>
+          <div className="card">
+            <div className="segmented" style={{marginBottom:14}}>
+              <button className={payTab==="qr"?"active":""} onClick={()=>setPayTab("qr")}><Icon name="qr" size={13}/> QR code</button>
+              <button className={payTab==="zelle"?"active":""} onClick={()=>setPayTab("zelle")}><Icon name="dollar" size={13}/> Zelle</button>
+            </div>
+            {payTab === "qr" ? (
+              <div style={{textAlign:"center"}}>
+                <div className="qr-wrap"><div ref={qrRef}></div></div>
+                <div style={{fontSize:"0.76em", color:"var(--text-tertiary)", marginTop:10}}>Client scans to pay {currency2(total)} via Zelle</div>
+              </div>
+            ) : (
+              <div style={{textAlign:"center", padding:"10px 0"}}>
+                <div style={{fontSize:"0.72em", color:"var(--text-tertiary)", fontWeight:600, marginBottom:4}}>SEND TO</div>
+                <div style={{fontFamily:"var(--font-mono)", fontWeight:700, fontSize:"1.05em"}}>{profile.zelle || "you@kontrak.app"}</div>
+                <button className="btn btn-secondary btn-sm" style={{marginTop:12}} onClick={()=>notify("Copied to clipboard","copy")}>
+                  <Icon name="copy" size={13}/>Copy handle
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="row" style={{gap:8, marginTop:12}}>
+            {invoice.status === "overdue" && <button className="btn btn-secondary" style={{flex:1}} onClick={remind}><Icon name="bell" size={14}/>Remind</button>}
+            <button className="btn btn-primary" style={{flex:1}} onClick={markPaid}><Icon name="check" size={14}/>Mark as paid</button>
+          </div>
+        </div>
+      )}
+
+      {invoice.status === "paid" && (
+        <div className="card" style={{textAlign:"center", marginTop:16}}>
+          <div className="icon-btn" style={{width:48,height:48,margin:"0 auto 10px", color:"var(--success)", background:"var(--success-soft)"}}><Icon name="check-circle" size={22}/></div>
+          <div style={{fontWeight:700}}>Payment received</div>
+          <div style={{fontSize:"0.8em", color:"var(--text-tertiary)", marginTop:2}}>Paid on {longDate(invoice.paidDate)}</div>
+        </div>
+      )}
+      <div style={{height:10}}></div>
+    </div>
+  );
+}
+
+/* ============================== SETTINGS ============================== */
+function SettingsScreen({ profile, setProfile, theme, setTheme, fontSize, setFontSize, notify, onReset }) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState(profile);
+  const [notifOn, setNotifOn] = useState(true);
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const saveProfile = () => { setProfile(form); setEditing(false); notify("Profile updated", "check-circle"); };
+
+  return (
+    <div>
+      <div className="card" style={{textAlign:"center", padding:"22px 14px"}}>
+        <div className="avatar avatar-lg" style={{margin:"0 auto 10px"}}>{initials(profile.name)}</div>
+        <div style={{fontWeight:700, fontSize:"1.05em"}}>{profile.name}</div>
+        <div style={{color:"var(--text-tertiary)", fontSize:"0.82em"}}>{profile.trade}</div>
+        <button className="btn btn-secondary btn-sm" style={{marginTop:12}} onClick={()=>{setForm(profile); setEditing(true);}}><Icon name="edit" size={13}/>Edit profile</button>
+      </div>
+
+      <div className="section-title">Business & payments</div>
+      <div className="card">
+        <div className="setting-row">
+          <div className="setting-row-text"><div className="setting-row-title">Business name</div><div className="setting-row-sub">{profile.business || "Not set"}</div></div>
+        </div>
+        <div className="setting-row">
+          <div className="setting-row-text"><div className="setting-row-title">Zelle handle</div><div className="setting-row-sub">{profile.zelle || "Not set"}</div></div>
+          <button className="icon-btn" onClick={()=>{setForm(profile); setEditing(true);}} aria-label="Edit"><Icon name="edit" size={13}/></button>
+        </div>
+      </div>
+
+      <div className="section-title">Appearance</div>
+      <div className="card">
+        <div className="setting-row">
+          <div className="setting-row-text">
+            <div className="setting-row-title">Theme</div>
+            <div className="setting-row-sub">Choose light or dark mode</div>
+          </div>
+        </div>
+        <div className="segmented" style={{marginTop:2, marginBottom:14}}>
+          <button className={theme==="dark"?"active":""} onClick={()=>setTheme("dark")}><Icon name="moon" size={13}/> Dark</button>
+          <button className={theme==="light"?"active":""} onClick={()=>setTheme("light")}><Icon name="sun" size={13}/> Light</button>
+        </div>
+        <div className="setting-row">
+          <div className="setting-row-text">
+            <div className="setting-row-title">Text size</div>
+            <div className="setting-row-sub">Adjust for comfortable reading</div>
+          </div>
+        </div>
+        <div className="segmented" style={{marginTop:2}}>
+          <button className={fontSize==="sm"?"active":""} onClick={()=>setFontSize("sm")}>Small</button>
+          <button className={fontSize==="md"?"active":""} onClick={()=>setFontSize("md")}>Medium</button>
+          <button className={fontSize==="lg"?"active":""} onClick={()=>setFontSize("lg")}>Large</button>
+        </div>
+      </div>
+
+      <div className="section-title">Notifications</div>
+      <div className="card">
+        <div className="setting-row">
+          <div className="setting-row-text"><div className="setting-row-title">Job & invoice reminders</div><div className="setting-row-sub">Due dates and payment status</div></div>
+          <button className={"switch " + (notifOn?"on":"")} onClick={()=>setNotifOn(!notifOn)} aria-label="Toggle notifications"><div className="switch-knob"></div></button>
+        </div>
+      </div>
+
+      <div className="section-title">Data</div>
+      <div className="card">
+        <div className="setting-row">
+          <div className="setting-row-text"><div className="setting-row-title">Reset app data</div><div className="setting-row-sub">Clears clients, jobs, and invoices</div></div>
+          <button className="btn btn-danger btn-sm" onClick={()=>setConfirmReset(true)}>Reset</button>
+        </div>
+      </div>
+
+      <div style={{textAlign:"center", marginTop:22, color:"var(--text-tertiary)", fontSize:"0.76em"}}>
+        <span className="wordmark" style={{fontSize:"1.1em", color:"var(--text-secondary)"}}>Kontrak</span><br/>
+        Version 1.0 · Prototype
+      </div>
+      <div style={{height:16}}></div>
+
+      {editing && (
+        <Sheet title="Edit profile" onClose={()=>setEditing(false)}>
+          <div className="form-group"><label className="label">Your name</label><input className="input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} /></div>
+          <div className="form-group">
+            <label className="label">Trade</label>
+            <select className="select" value={form.trade} onChange={e=>setForm({...form,trade:e.target.value})}>
+              {["General Contractor","Electrician","Plumber","HVAC","Carpenter","Landscaper","Painter","Roofer","Handyman","Other"].map(t=><option key={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className="form-group"><label className="label">Business name</label><input className="input" value={form.business||""} onChange={e=>setForm({...form,business:e.target.value})} placeholder="Reyes Contracting Co." /></div>
+          <div className="form-group"><label className="label">Zelle handle (email or phone)</label><input className="input" value={form.zelle||""} onChange={e=>setForm({...form,zelle:e.target.value})} placeholder="you@email.com" /></div>
+          <button className="btn btn-primary btn-block" onClick={saveProfile}>Save changes</button>
+        </Sheet>
+      )}
+
+      {confirmReset && (
+        <Sheet title="Reset app data?" onClose={()=>setConfirmReset(false)}>
+          <div style={{fontSize:"0.88em", color:"var(--text-secondary)", marginBottom:18}}>
+            This permanently clears all clients, jobs, and invoices on this device. This can't be undone.
+          </div>
+          <div className="row" style={{gap:8}}>
+            <button className="btn btn-secondary" style={{flex:1}} onClick={()=>setConfirmReset(false)}>Cancel</button>
+            <button className="btn btn-danger" style={{flex:1}} onClick={()=>{onReset(); setConfirmReset(false);}}>Reset data</button>
+          </div>
+        </Sheet>
+      )}
+    </div>
+  );
+}
+
+/* ============================== APP ============================== */
+const TABS = [
+  { key: "home", label: "Home", icon: "home" },
+  { key: "clients", label: "Clients", icon: "users" },
+  { key: "jobs", label: "Jobs", icon: "briefcase" },
+  { key: "pay", label: "Pay", icon: "wallet" },
+  { key: "settings", label: "Settings", icon: "sliders" },
+];
+
+function App() {
+  const [ready, setReady] = useState(false);
+  const [onboarded, setOnboarded] = useState(false);
+  const [profile, setProfile] = useState({ name: "Jordan Reyes", trade: "General Contractor", business: "Reyes Contracting Co.", zelle: "jordan@reyescontracting.com" });
+  const [theme, setTheme] = useState("dark");
+  const [fontSize, setFontSize] = useState("md");
+  const [data, setData] = useState(seedData());
+  const [tab, setTab] = useState("home");
+  const [params, setParams] = useState({});
+  const [toasts, setToasts] = useState([]);
+
+  // Load persisted state once
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await window.storage.get("kontrak-app-state", false);
+        if (res && res.value) {
+          const saved = JSON.parse(res.value);
+          if (saved.profile) setProfile(saved.profile);
+          if (saved.theme) setTheme(saved.theme);
+          if (saved.fontSize) setFontSize(saved.fontSize);
+          if (saved.data) setData(saved.data);
+          if (saved.onboarded) setOnboarded(true);
+        }
+      } catch (e) { /* no saved state yet */ }
+      setReady(true);
+    })();
+  }, []);
+
+  // Persist on change (debounced)
+  useEffect(() => {
+    if (!ready) return;
+    const t = setTimeout(async () => {
+      try {
+        await window.storage.set("kontrak-app-state", JSON.stringify({ profile, theme, fontSize, data, onboarded }), false);
+      } catch (e) { /* best effort */ }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [profile, theme, fontSize, data, onboarded, ready]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.setProperty("--fs-scale", fontSize === "sm" ? "0.9" : fontSize === "lg" ? "1.15" : "1");
+  }, [theme, fontSize]);
+
+  const notify = useCallback((msg, icon) => {
+    const id = uid("t");
+    setToasts(ts => [...ts, { id, msg, icon }]);
+    setTimeout(() => setToasts(ts => ts.filter(t => t.id !== id)), 2600);
+  }, []);
+
+  const go = useCallback((t, p = {}) => { setTab(t); setParams(p); }, []);
+  const switchTab = (t) => { setTab(t); setParams({}); };
+
+  const addClient = (c) => setData(d => ({ ...d, clients: [...d.clients, c] }));
+  const addJob = (j) => setData(d => ({ ...d, jobs: [...d.jobs, j] }));
+  const updateJob = (id, patch) => setData(d => ({ ...d, jobs: d.jobs.map(j => j.id === id ? { ...j, ...patch } : j) }));
+  const addInvoice = (i) => setData(d => ({ ...d, invoices: [...d.invoices, i] }));
+  const updateInvoice = (id, patch) => setData(d => ({ ...d, invoices: d.invoices.map(i => i.id === id ? { ...i, ...patch } : i) }));
+  const resetData = () => { const fresh = seedData(); setData(fresh); notify("App data reset", "check-circle"); };
+
+  if (!ready) return <div className="app-shell"><div className="device"></div></div>;
+
+  if (!onboarded) {
+    return (
+      <div className="app-shell">
+        <div className="device" data-theme={theme}>
+          <Onboarding onDone={(p) => { setProfile(pr => ({...pr, ...p})); setOnboarded(true); }} />
+        </div>
+      </div>
+    );
+  }
+
+  const titles = {
+    home: { title: "Kontrak", sub: null },
+    clients: { title: params.clientId ? (data.clients.find(c=>c.id===params.clientId)||{}).name : "Clients", sub: params.clientId ? null : (data.clients.length + " total") },
+    jobs: { title: params.jobId ? "Job details" : "Jobs", sub: params.jobId ? null : (data.jobs.length + " total") },
+    pay: { title: params.invoiceId ? (data.invoices.find(i=>i.id===params.invoiceId)||{}).number : "Pay", sub: params.invoiceId ? null : (data.invoices.length + " invoices") },
+    settings: { title: "Settings", sub: null },
+  };
+  const hasDetail = (tab === "clients" && params.clientId) || (tab === "jobs" && params.jobId) || (tab === "pay" && params.invoiceId);
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="sidebar-brand"><span className="wordmark">Kontrak</span></div>
+        <nav className="sidebar-nav">
+          {TABS.filter(t => t.key !== "settings").map(t => (
+            <button key={t.key} className={"sidebar-item " + (tab===t.key?"active":"")} onClick={()=>switchTab(t.key)}>
+              <Icon name={t.icon} size={17}/>
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </nav>
+        <button className="sidebar-profile" onClick={()=>switchTab("settings")}>
+          <div className="avatar avatar-sm">{initials(profile.name)}</div>
+          <div className="stack" style={{gap:0, alignItems:"flex-start", minWidth:0}}>
+            <span style={{fontSize:"0.82em", fontWeight:600, whiteSpace:"nowrap"}}>{profile.name}</span>
+            <span style={{fontSize:"0.7em", color:"var(--text-tertiary)"}}>{profile.trade}</span>
+          </div>
+          <Icon name="sliders" size={14} style={{marginLeft:"auto", color: tab==="settings" ? "var(--accent)" : "var(--text-tertiary)"}}/>
+        </button>
+      </aside>
+
+      <div className="device">
+        <TopBar
+          title={tab === "home" ? (<span className="row" style={{gap:8}}><span className="wordmark">Kontrak</span></span>) : titles[tab].title}
+          sub={titles[tab].sub}
+          onBack={hasDetail ? () => setParams({}) : null}
+          right={
+            <React.Fragment>
+              <button className="btn btn-primary btn-sm header-new-job-btn" onClick={() => go("jobs", { newJob: true })}>
+                <Icon name="plus" size={13}/>New job
+              </button>
+              {tab === "home" && <button className="icon-btn" onClick={()=>switchTab("settings")} aria-label="Settings"><Icon name="sliders" size={16}/></button>}
+            </React.Fragment>
+          }
+        />
+        <div className="content">
+          {tab === "home" && <Dashboard profile={profile} jobs={data.jobs} clients={data.clients} invoices={data.invoices} go={go} notify={notify} />}
+          {tab === "clients" && <ClientsScreen clients={data.clients} jobs={data.jobs} invoices={data.invoices} go={go} params={params} onAddClient={addClient} notify={notify} />}
+          {tab === "jobs" && <JobsScreen jobs={data.jobs} clients={data.clients} invoices={data.invoices} go={go} params={params} onAddJob={addJob} onUpdateJob={updateJob} notify={notify} />}
+          {tab === "pay" && <PayScreen invoices={data.invoices} jobs={data.jobs} clients={data.clients} profile={profile} go={go} params={params} onAddInvoice={addInvoice} onUpdateInvoice={updateInvoice} notify={notify} />}
+          {tab === "settings" && <SettingsScreen profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} fontSize={fontSize} setFontSize={setFontSize} notify={notify} onReset={resetData} />}
+        </div>
+
+        <Toasts toasts={toasts} />
+
+        <div className="bottom-nav">
+          {TABS.map(t => (
+            <button key={t.key} className={"nav-item " + (tab===t.key?"active":"")} onClick={()=>switchTab(t.key)} aria-label={t.label}>
+              <Icon name={t.icon} size={20} />
+              <span>{t.label}</span>
+              <span className="nav-dot"></span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
