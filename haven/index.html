@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Haven — a quiet place to think out loud</title>
+<meta name="description" content="Haven is a calm space to talk through what's on your mind, with reflective questions and gentle coping suggestions drawn from CBT and motivational interviewing.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%95%AF%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          paper: { DEFAULT: '#FAF6EF', raised: '#FFFFFF', dark: '#1B1E24', 'dark-raised': '#232730' },
+          ink: { DEFAULT: '#2B2A28', soft: '#5B5750', faint: '#928C7F', dark: '#EDE8DE', 'dark-soft': '#B8B2A4', 'dark-faint': '#7C8089' },
+          line: { DEFAULT: '#E4DDCF', dark: '#333947' },
+          denim: { DEFAULT: '#3A5068', deep: '#253647', dark: '#8CA6BE', 'dark-deep': '#B7CBDC' },
+          moss: { DEFAULT: '#4C5D4A', fill: '#DCE5D6', border: '#CBD8C4', dark: '#93B48B', 'dark-fill': '#29352A', 'dark-border': '#3D4A3B' },
+          ochre: { DEFAULT: '#A8672A', fill: '#F3E1C4', border: '#E3C79C', dark: '#E3A85F', 'dark-fill': '#3B2F1C', 'dark-border': '#4A3D28' },
+          crisis: { DEFAULT: '#A03A2A', fill: '#F6DAD3', line: '#E3B4A6', dark: '#E2897A', 'dark-fill': '#3B241F', 'dark-line': '#5C332B' }
+        },
+        fontFamily: {
+          display: ['Newsreader', 'Georgia', 'serif'],
+          body: ['Karla', 'system-ui', '-apple-system', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace']
+        },
+        boxShadow: {
+          s: '0 1px 2px rgba(43,42,40,.07)',
+          m: '0 10px 30px -14px rgba(43,42,40,.28)'
+        },
+        keyframes: {
+          breathe: {
+            '0%': { transform: 'scale(1)', opacity: .6 },
+            '45%': { transform: 'scale(1.45)', opacity: .05 },
+            '46%': { transform: 'scale(1.45)', opacity: 0 },
+            '100%': { transform: 'scale(1)', opacity: .6 }
+          },
+          dotbounce: {
+            '0%, 60%, 100%': { transform: 'translateY(0)', opacity: .5 },
+            '30%': { transform: 'translateY(-4px)', opacity: 1 }
+          }
+        },
+        animation: {
+          breathe: 'breathe 6.2s ease-in-out infinite',
+          dotbounce: 'dotbounce 1.2s ease-in-out infinite'
+        }
+      }
+    }
+  };
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    body { @apply bg-paper dark:bg-paper-dark text-ink dark:text-ink-dark font-body antialiased transition-colors duration-300 m-0; }
+    button, textarea, input { font-family: inherit; }
+    a { @apply text-denim dark:text-denim-dark; }
+    ::selection { @apply bg-ochre-fill dark:bg-ochre-dark-fill; }
+    :focus-visible { @apply outline outline-2 outline-denim dark:outline-denim-dark outline-offset-2 rounded; }
+  }
+  @layer components {
+    /* buttons & chips */
+    .icon-btn { @apply inline-flex items-center justify-center w-9 h-9 rounded-full border border-transparent bg-transparent text-ink-soft dark:text-ink-dark-soft cursor-pointer transition-colors hover:bg-line dark:hover:bg-line-dark hover:text-ink dark:hover:text-ink-dark; }
+    .mood-chip { @apply inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink-soft dark:text-ink-dark-soft text-[.85rem] cursor-pointer shadow-s hover:border-denim dark:hover:border-denim-dark hover:text-ink dark:hover:text-ink-dark; }
+    .mood-opt { @apply px-[15px] py-[9px] rounded-full border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink-soft dark:text-ink-dark-soft text-[.88rem] cursor-pointer transition-colors hover:border-denim dark:hover:border-denim-dark hover:text-ink dark:hover:text-ink-dark; }
+    .mood-opt.selected { @apply bg-denim dark:bg-denim-dark border-denim dark:border-denim-dark text-white; }
+    .btn-primary { @apply inline-flex items-center gap-2 px-[26px] py-3 rounded-full border-0 bg-denim dark:bg-denim-dark text-white text-[.98rem] font-semibold cursor-pointer shadow-s transition-transform hover:bg-denim-deep dark:hover:bg-denim-dark-deep hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0; }
+    .subbar-btn { @apply bg-transparent border-0 text-ink-faint dark:text-ink-dark-faint text-[.8rem] cursor-pointer px-1 py-1.5 inline-flex items-center gap-1 hover:text-denim dark:hover:text-denim-dark; }
+
+    /* chat thread */
+    .stitch-line { @apply relative pl-5 before:content-[''] before:absolute before:left-1 before:top-1.5 before:bottom-1.5 before:w-px before:bg-line dark:before:bg-line-dark; }
+    .turn-row { @apply relative flex mb-[18px] before:content-[''] before:absolute before:-left-5 before:top-2 before:w-[9px] before:h-[9px] before:rounded-full before:bg-paper dark:before:bg-paper-dark before:border-2; }
+    .turn-row.user { @apply justify-end before:border-denim dark:before:border-denim-dark; }
+    .turn-row.agent { @apply before:border-moss dark:before:border-moss-dark; }
+    .bubble { @apply max-w-[82%] sm:max-w-[82%] px-[15px] py-[11px] rounded-2xl leading-relaxed text-[.95rem] shadow-s; }
+    .bubble.user { @apply bg-denim dark:bg-denim-dark text-white rounded-br-[4px] max-w-[92%]; }
+    .bubble.agent { @apply bg-paper-raised dark:bg-paper-dark-raised border border-line dark:border-line-dark rounded-bl-[4px] max-w-[92%]; }
+    .agent-name { @apply block text-[.72rem] font-bold tracking-wide uppercase text-moss dark:text-moss-dark mb-1; }
+    .typing-dot { @apply w-1.5 h-1.5 rounded-full bg-ink-faint dark:bg-ink-dark-faint animate-dotbounce motion-reduce:animate-none motion-reduce:opacity-80; }
+
+    /* cards */
+    .card { @apply max-w-[92%] rounded-2xl px-4 py-3.5 shadow-s border; }
+    .card-reframe { @apply bg-moss-fill dark:bg-moss-dark-fill border-moss-border dark:border-moss-dark-border; }
+    .card-tool { @apply bg-ochre-fill dark:bg-ochre-dark-fill border-ochre-border dark:border-ochre-dark-border; }
+    .card-title { @apply flex items-center gap-[7px] font-bold text-[.84rem] mb-1.5 text-ink dark:text-ink-dark; }
+    .card-text { @apply text-[.92rem] leading-relaxed m-0 text-ink dark:text-ink-dark; }
+    .card-actions { @apply flex gap-2 mt-[11px]; }
+    .card-actions button { @apply text-[.78rem] px-3 py-1.5 rounded-full border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink-soft dark:text-ink-dark-soft cursor-pointer hover:border-ink-soft hover:text-ink dark:hover:text-ink-dark; }
+    .card-actions button.given { @apply bg-ink dark:bg-ink-dark text-paper dark:text-paper-dark border-ink dark:border-ink-dark; }
+
+    /* crisis */
+    .card-crisis { @apply max-w-[92%] bg-crisis-fill dark:bg-crisis-dark-fill border border-crisis-line dark:border-crisis-dark-line rounded-2xl px-[18px] py-4 shadow-m; }
+    .crisis-links { @apply flex flex-col gap-[7px]; }
+    .crisis-link { @apply flex items-center justify-between gap-2.5 px-[13px] py-[9px] rounded-lg bg-paper-raised dark:bg-paper-dark-raised border border-crisis-line dark:border-crisis-dark-line text-ink dark:text-ink-dark no-underline text-[.87rem]; }
+
+    /* composer */
+    .mic-btn { @apply relative shrink-0 w-10 h-10 rounded-full border border-line dark:border-line-dark bg-paper dark:bg-paper-dark text-ink-soft dark:text-ink-dark-soft cursor-pointer flex items-center justify-center text-[1.05rem] disabled:opacity-35 disabled:cursor-not-allowed; }
+    .mic-btn.listening { @apply text-white bg-denim dark:bg-denim-dark border-denim dark:border-denim-dark; }
+    .mic-ring { @apply absolute -inset-1.5 rounded-full border-2 border-denim dark:border-denim-dark animate-breathe motion-reduce:animate-none motion-reduce:opacity-35; }
+    .send-btn { @apply shrink-0 w-10 h-10 rounded-full border-0 bg-ink dark:bg-ink-dark text-paper dark:text-paper-dark cursor-pointer flex items-center justify-center text-[1.05rem] transition-colors disabled:opacity-30 disabled:cursor-not-allowed; }
+
+    /* reflections */
+    .section { @apply bg-paper-raised dark:bg-paper-dark-raised border border-line dark:border-line-dark rounded-2xl px-[22px] py-5 mb-[18px] shadow-s; }
+    .section-heading { @apply text-[.82rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint font-bold m-0; }
+    .section-empty { @apply text-ink-faint dark:text-ink-dark-faint text-[.88rem] leading-relaxed; }
+    .pattern-list, .tools-list { @apply list-none m-0 p-0 flex flex-col gap-2.5; }
+    .pattern-list li, .tools-list li { @apply flex items-baseline gap-2.5 text-[.9rem] leading-relaxed; }
+    .pattern-count { @apply font-mono text-[.78rem] text-moss dark:text-moss-dark shrink-0 min-w-[20px]; }
+    .tool-rank { @apply font-mono text-[.78rem] text-ochre dark:text-ochre-dark shrink-0; }
+
+    /* modals */
+    .overlay { @apply fixed inset-0 bg-black/40 flex items-center justify-center p-5 z-[100]; }
+    .modal { @apply bg-paper-raised dark:bg-paper-dark-raised rounded-[22px] px-[26px] pt-[26px] pb-[22px] max-w-[420px] w-full shadow-m max-h-[86vh] overflow-y-auto; }
+    .modal-close { @apply float-right bg-transparent border-0 text-ink-faint dark:text-ink-dark-faint text-lg cursor-pointer; }
+    .modal-title { @apply font-display font-medium text-[1.35rem] m-0; }
+    .mood-scale-btn { @apply flex-1 flex flex-col items-center gap-1.5 px-1 py-3 rounded-lg border border-line dark:border-line-dark bg-paper dark:bg-paper-dark cursor-pointer text-ink-soft dark:text-ink-dark-soft hover:border-denim dark:hover:border-denim-dark hover:text-ink dark:hover:text-ink-dark; }
+    .info-section h3 { @apply text-[.82rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint mb-1.5; }
+    .info-section p { @apply text-[.88rem] leading-relaxed text-ink-soft dark:text-ink-dark-soft m-0; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+/* ============================================================
+   Conversation engine
+   A rule-based, CBT / motivational-interviewing–informed engine.
+   No text ever leaves the browser — everything below runs locally.
+   ============================================================ */
+
+const EMOTIONS = {
+  sadness: { label: 'sadness', words: ['sad','down','depressed','crying','tears','heartbroken','miserable','hurt','grief','grieving'] },
+  anxiety: { label: 'anxiety', words: ['anxious','anxiety','worried','worry','panic','nervous','scared','afraid','racing thoughts','on edge','dread'] },
+  anger: { label: 'anger', words: ['angry','mad','furious','irritated','resentful','frustrated','pissed','rage'] },
+  stress: { label: 'stress', words: ['stressed','stress','burnt out','burned out','exhausted','overworked','behind','deadline','overwhelmed','too much','swamped'] },
+  guilt: { label: 'guilt', words: ['guilty','ashamed','shame','my fault','failure','let everyone down','embarrassed'] },
+  numb: { label: 'numbness', words: ['numb','empty','flat',"don't care","can't feel",'nothing matters','disconnected'] },
+  lonely: { label: 'loneliness', words: ['lonely','alone','isolated','no one','nobody understands','left out'] },
+  okay: { label: 'steadiness', words: ['okay','fine','alright','good','better','calm','peaceful','grateful','proud'] }
+};
+
+const DISTORTIONS = [
+  { key: 'allOrNothing', name: 'all-or-nothing thinking',
+    patterns: [/\balways\b/i, /\bnever\b/i, /\beveryone\b/i, /\bno ?one\b/i, /\bcompletely (ruined|failed|useless)\b/i, /\btotal(ly)? (failure|disaster)\b/i],
+    reflect: "I noticed some black-and-white language in there — a word like \"always\" or \"never.\"",
+    reframe: "Rarely is anything 100% one way. Is there an exception, even a small one, to that always or never?" },
+  { key: 'catastrophizing', name: 'catastrophizing',
+    patterns: [/\bdisaster\b/i, /\bruined\b/i, /\bthe worst\b/i, /\bcan'?t handle\b/i, /\bcatastrophe\b/i, /\bfalling apart\b/i],
+    reflect: "It sounds like your mind jumped straight to the worst-case version of this.",
+    reframe: "If a friend told you this happened to them, would you call it a disaster — or a hard day?" },
+  { key: 'shouldStatements', name: 'a "should" statement',
+    patterns: [/\bi should(n'?t)? have\b/i, /\bi should\b/i, /\bi have to\b/i, /\bi must\b/i, /\bsupposed to\b/i],
+    reflect: "I'm hearing a strict rule for yourself in there — a \"should\" or a \"have to.\"",
+    reframe: "Where did that rule come from? Would you hold someone you love to it this strictly?" },
+  { key: 'mindReading', name: 'mind reading',
+    patterns: [/\bthey think\b/i, /\bthey probably\b/i, /\beveryone thinks\b/i, /\bhe (hates|thinks)\b/i, /\bshe (hates|thinks)\b/i, /\bthey hate me\b/i, /\bthey must think\b/i],
+    reflect: "It sounds like you might be guessing at what someone else is thinking.",
+    reframe: "What's the actual evidence for that — something they said or did, not just a feeling?" },
+  { key: 'labeling', name: 'a harsh label',
+    patterns: [/\bi'?m (such a |such an )?(failure|loser|mess|idiot|disaster)\b/i, /\bi'?m stupid\b/i, /\bi'?m worthless\b/i, /\bi'?m broken\b/i, /\bi'?m pathetic\b/i],
+    reflect: "That's a heavy label to put on all of yourself over one thing.",
+    reframe: "Would you describe a friend that harshly for the same mistake? What would you call it instead?" },
+  { key: 'personalization', name: 'personalization',
+    patterns: [/\bmy fault\b/i, /\bbecause of me\b/i, /\bi ruined\b/i, /\bi caused\b/i, /\bif i had(n'?t)?\b/i],
+    reflect: "You're carrying a lot of the blame for this yourself.",
+    reframe: "What parts of this were actually in your control, and what parts genuinely weren't?" },
+  { key: 'fortuneTelling', name: 'fortune telling',
+    patterns: [/\bit'?s going to fail\b/i, /\bnothing (will|ever) (change|work)\b/i, /\bwon'?t get better\b/i, /\bnever going to\b/i, /\bpointless\b/i],
+    reflect: "It sounds like you're predicting how this ends before it's actually played out.",
+    reframe: "What's one version of how this could go that isn't the worst case?" }
+];
+
+// Kept broad on purpose: for crisis language, a false positive (showing
+// resources unnecessarily) is a far smaller cost than a missed one.
+const CRISIS_PATTERNS = [
+  /\bkill(ing)? myself\b/i, /\bend(ing)? my life\b/i, /\bsuicid\w*\b/i,
+  /\bwant(ed)? to die\b/i, /\bdon'?t want to (be alive|live|wake up)\b/i, /\bno reason to live\b/i,
+  /\bbetter off dead\b/i, /\bbetter off without me\b/i, /\bhurt(ing)? myself\b/i, /\bharm(ing)? myself\b/i,
+  /\bself[- ]?harm\b/i, /\bcutting myself\b/i, /\bcan'?t (go on|do this anymore)\b/i, /\bplan to (die|kill)\b/i,
+  /\bgoodbye forever\b/i, /\bending it all\b/i, /\bending it\b/i, /\bnot (worth|going to be) around\b/i,
+  /\btake my (own )?life\b/i, /\boverdose\b/i, /\bwish i (was|were) dead\b/i, /\bhurt (someone|him|her|them)\b/i,
+  /\bi'?m going to kill\b/i
+];
+
+const QUESTIONS = {
+  sadness: ["What's the heaviest part of this to sit with right now?", "How long has this feeling been building?", "Is there anyone in your corner you've been able to tell this to?"],
+  anxiety: ["What's the worry your mind keeps circling back to?", "If that worry actually came true, what would you do next?", "Where do you notice this in your body right now?"],
+  anger: ["What do you think is underneath the anger — hurt, fear, something else?", "What would feel fair here?", "What is this anger telling you that you need?"],
+  stress: ["If you could put down just one thing on your plate today, what would it be?", "What's actually urgent here, versus what just feels urgent?", "What would 'enough for today' look like?"],
+  guilt: ["What would you say to a friend who felt this guilty over the same thing?", "What part of this was actually your choice?", "What would it take to forgive yourself a little here?"],
+  numb: ["When did you last feel something different than this, even briefly?", "Is numb maybe protecting you from something bigger right now?", "What's one small thing that usually helps you feel present?"],
+  lonely: ["Who's someone you've felt closest to, even a little, this year?", "What does connection look like for you when it's working?", "Is there a small reach-out you could make today, even a short one?"],
+  okay: ["What's been going right lately?", "What's helped you feel steady?", "Anything you want to keep an eye on, even if today's okay?"]
+};
+const GENERIC_QUESTIONS = ["What feels most important to say next?", "What's been sitting with you today?", "Is there more to that you want to say?"];
+
+const TOOLS = {
+  breathing: { label: 'Box breathing', icon: '🫁', text: "Try this for four rounds: breathe in for 4 counts, hold for 4, out for 4, hold for 4." },
+  grounding: { label: '5-4-3-2-1 grounding', icon: '🌿', text: "Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, and 1 you can taste." },
+  journaling: { label: 'A page to yourself', icon: '📝', text: "Try writing for 5 minutes without stopping — don't worry about it making sense." },
+  activation: { label: 'One small step', icon: '🌱', text: "What's the smallest possible version of the thing you're avoiding? Could you do just that piece?" },
+  bodyReset: { label: 'Body reset', icon: '💧', text: "Stand up, roll your shoulders, drink some water, unclench your jaw — small resets add up." },
+  selfCompassion: { label: 'A kinder voice', icon: '💛', text: "Try a hand on your chest and saying: \"this is hard right now, and that's okay — I'm doing my best.\"" }
+};
+
+const EMOTION_OPENERS = {
+  sadness: ["That sounds like it really hurts.", "I can hear how much weight that's carrying.", "That's a lot to feel."],
+  anxiety: ["That sounds like a lot of worry to be holding.", "I can hear how on edge that's made you.", "That sounds unsettling to sit with."],
+  anger: ["That sounds really frustrating.", "I can hear how much that's grating on you.", "That sounds like it crossed a line for you."],
+  stress: ["That sounds like a lot to carry at once.", "I can hear how stretched thin you're feeling.", "That sounds exhausting."],
+  guilt: ["That sounds like a heavy thing to carry.", "I can hear how much that's weighing on you."],
+  numb: ["Thanks for naming that, even flat can be hard to describe.", "That sounds like a hard place to be sitting."],
+  lonely: ["That sounds like a lonely place to be.", "I can hear how isolating that feels."],
+  okay: ["Good to hear.", "I'm glad that's where things are right now.", "Thanks for sharing that."]
+};
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+function weightedPick(weightMap, keys) {
+  const weights = keys.map(k => (weightMap && weightMap[k]) || 1);
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < keys.length; i++) { r -= weights[i]; if (r <= 0) return keys[i]; }
+  return keys[keys.length - 1];
+}
+
+function analyze(text) {
+  const lower = text.toLowerCase();
+  const crisis = CRISIS_PATTERNS.some(p => p.test(lower));
+  const distortion = DISTORTIONS.find(d => d.patterns.some(p => p.test(lower))) || null;
+  let emotion = null, bestScore = 0;
+  Object.entries(EMOTIONS).forEach(([key, def]) => {
+    const score = def.words.reduce((s, w) => s + (lower.includes(w) ? 1 : 0), 0);
+    if (score > bestScore) { bestScore = score; emotion = key; }
+  });
+  return { crisis, distortion, emotion };
+}
+
+function buildResponse(userText, weights, turnCount) {
+  const { crisis, distortion, emotion } = analyze(userText);
+  if (crisis) return { type: 'crisis' };
+
+  const opener = distortion ? distortion.reflect : (emotion ? pick(EMOTION_OPENERS[emotion]) : "Thank you for telling me that.");
+  const reframe = distortion ? { key: distortion.key, name: distortion.name, text: distortion.reframe } : null;
+  const qBank = (emotion && QUESTIONS[emotion]) || GENERIC_QUESTIONS;
+  const question = pick(qBank);
+
+  const heavy = emotion && ['sadness', 'anxiety', 'stress', 'lonely', 'guilt'].includes(emotion);
+  const offerTool = (turnCount > 0 && turnCount % 3 === 0) || (heavy && turnCount > 0 && turnCount % 2 === 0);
+  let tool = null;
+  if (offerTool) {
+    const toolKey = weightedPick(weights, Object.keys(TOOLS));
+    tool = { key: toolKey, ...TOOLS[toolKey] };
+  }
+  return { type: 'reflect', opener, reframe, question, tool, emotion, distortionKey: distortion ? distortion.key : null };
+}
+
+/* ============================================================
+   Storage — local only. No transcript text is ever persisted;
+   only mood check-ins and derived pattern/tool signals are.
+   ============================================================ */
+
+const STORAGE_KEY = 'haven-state-v1';
+const THEME_KEY = 'haven-theme';
+
+function defaultState() {
+  return {
+    onboarded: false,
+    name: '',
+    moodLog: [],           // { t, value(1-5) }
+    distortionCounts: {},  // { key: n }
+    weights: { coping: {} },
+    toolFeedback: {}       // { key: { helped, notNow } }
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    return { ...defaultState(), ...JSON.parse(raw) };
+  } catch (e) { return defaultState(); }
+}
+
+function saveState(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* best effort */ }
+}
+
+/* ============================================================
+   Voice input (Web Speech API)
+   ============================================================ */
+
+function useVoiceInput(onResult) {
+  const [listening, setListening] = useState(false);
+  const [supported, setSupported] = useState(true);
+  const [error, setError] = useState(null);
+  const recRef = useRef(null);
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
+
+  useEffect(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { setSupported(false); return; }
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    rec.onresult = (e) => {
+      let interim = '', final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t; else interim += t;
+      }
+      onResultRef.current(final || interim, !!final);
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = (e) => { setListening(false); setError(e.error || 'error'); };
+    recRef.current = rec;
+    return () => { try { rec.stop(); } catch (e) {} };
+  }, []);
+
+  const start = useCallback(() => {
+    if (recRef.current && !listening) {
+      setError(null);
+      try { recRef.current.start(); setListening(true); } catch (e) {}
+    }
+  }, [listening]);
+  const stop = useCallback(() => {
+    if (recRef.current && listening) recRef.current.stop();
+  }, [listening]);
+
+  return { listening, supported, error, start, stop };
+}
+
+/* ============================================================
+   Small helpers
+   ============================================================ */
+
+let uidCounter = 0;
+const uid = () => 'm' + (++uidCounter) + '-' + Date.now();
+
+const MOOD_SCALE = [
+  { value: 1, emoji: '😞', label: 'Rough' },
+  { value: 2, emoji: '🙁', label: 'Hard' },
+  { value: 3, emoji: '😐', label: 'Okay' },
+  { value: 4, emoji: '🙂', label: 'Good' },
+  { value: 5, emoji: '😊', label: 'Great' }
+];
+const moodMeta = (v) => MOOD_SCALE.find(m => m.value === v) || MOOD_SCALE[2];
+
+function formatDay(ts) {
+  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/* ============================================================
+   Icons (inline SVG, no icon library)
+   ============================================================ */
+
+const BrandMark = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="3.4" fill="currentColor" opacity="0.9" />
+    <path d="M2 12 H8.2 M15.8 12 H22" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+const MicIcon = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0" /><line x1="12" y1="19" x2="12" y2="22" />
+  </svg>
+);
+const SendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z" /></svg>
+);
+const MoonIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z" /></svg>
+);
+const SunIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+);
+const InfoIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" /><circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none" /></svg>
+);
+const ChartIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 15l4-5 3 3 5-7" /></svg>
+);
+const BackIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+);
+
+/* ============================================================
+   Crisis resources — always the same, never gated behind logic
+   ============================================================ */
+
+function CrisisResources() {
+  return (
+    <div className="crisis-links">
+      <a className="crisis-link" href="tel:988"><span><strong className="font-bold">Call 988</strong> — Suicide &amp; Crisis Lifeline (US)</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="sms:988"><span><strong className="font-bold">Text 988</strong> — Suicide &amp; Crisis Lifeline (US)</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="sms:741741&body=HOME"><span><strong className="font-bold">Text HOME to 741741</strong> — Crisis Text Line</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="https://findahelpline.com" target="_blank" rel="noopener noreferrer"><span><strong className="font-bold">findahelpline.com</strong> — outside the US</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="tel:911"><span><strong className="font-bold">Call 911</strong> — if you're in immediate danger</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+    </div>
+  );
+}
+
+/* ============================================================
+   Onboarding
+   ============================================================ */
+
+function Onboarding({ onBegin }) {
+  const [name, setName] = useState('');
+  const [mood, setMood] = useState(null);
+  const moods = [
+    { key: 'overwhelmed', label: 'Overwhelmed', value: 2 },
+    { key: 'anxious', label: 'Anxious', value: 2 },
+    { key: 'low', label: 'Low', value: 2 },
+    { key: 'numb', label: 'Numb', value: 2 },
+    { key: 'okay', label: 'Okay, just want to talk', value: 4 }
+  ];
+  return (
+    <div className="flex-1 flex items-center justify-center px-5 py-8">
+      <div className="max-w-[460px] w-full text-center">
+        <BrandMark className="w-11 h-11 mx-auto mb-[18px] text-ink dark:text-ink-dark" />
+        <h1 className="font-display text-4xl font-medium m-0 mb-1.5">Haven</h1>
+        <p className="font-display italic text-ink-soft dark:text-ink-dark-soft text-[1.15rem] m-0 mb-[22px]">a quiet place to think out loud</p>
+        <p className="text-ink-soft dark:text-ink-dark-soft leading-relaxed text-[.96rem] m-0 mb-7">
+          This isn't a therapist, and it won't diagnose you. Think of it as a space to sort through
+          what's loud in your head — before, between, or instead of a session with someone licensed to help.
+        </p>
+        <label className="block text-left text-[.78rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint mb-2" htmlFor="name-input">What should I call you? (optional, stays on this device)</label>
+        <input id="name-input" className="w-full px-3.5 py-3 rounded-lg border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink dark:text-ink-dark text-[.95rem] mb-6 placeholder:text-ink-faint dark:placeholder:text-ink-dark-faint" value={name} onChange={e => setName(e.target.value)} placeholder="Just a first name is fine" maxLength={40} />
+        <label className="block text-center text-[.78rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint mb-2">How are you arriving today?</label>
+        <div className="flex flex-wrap gap-2 justify-center mb-[30px]">
+          {moods.map(m => (
+            <button key={m.key} type="button" className={'mood-opt' + (mood && mood.key === m.key ? ' selected' : '')} onClick={() => setMood(m)}>
+              {m.label}
+            </button>
+          ))}
+        </div>
+        <button className="btn-primary" disabled={!mood} onClick={() => onBegin(name.trim(), mood)}>
+          Begin →
+        </button>
+        <div className="mt-[30px] pt-[18px] border-t border-line dark:border-line-dark text-[.82rem] text-ink-faint dark:text-ink-dark-faint leading-relaxed">
+          If you're thinking about suicide or self-harm, please reach out now: call or text{' '}
+          <a className="font-semibold" href="tel:988">988</a> (US), or find a helpline at{' '}
+          <a className="font-semibold" href="https://findahelpline.com" target="_blank" rel="noopener noreferrer">findahelpline.com</a>.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Mood check-in modal
+   ============================================================ */
+
+function MoodCheckInModal({ onClose, onPick }) {
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Mood check-in">
+        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+        <h2 className="modal-title">How are you arriving?</h2>
+        <p className="text-ink-faint dark:text-ink-dark-faint text-[.85rem] mt-1 mb-0">This is just for you — it stays on this device.</p>
+        <div className="flex justify-between gap-1.5 mt-[18px] mb-1">
+          {MOOD_SCALE.map(m => (
+            <button key={m.value} className="mood-scale-btn" onClick={() => onPick(m.value)}>
+              <span className="text-[1.4rem]">{m.emoji}</span>
+              <span className="text-[.68rem]">{m.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Info / disclaimer modal
+   ============================================================ */
+
+function InfoModal({ onClose }) {
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="About Haven">
+        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+        <h2 className="modal-title">About Haven</h2>
+        <div className="h-3.5" />
+        <div className="info-section mb-4">
+          <h3>What Haven is</h3>
+          <p>A reflective space that draws on ideas from cognitive behavioral therapy and motivational
+          interviewing — reflective listening, gentle questions, and noticing thought patterns — to help
+          you talk something through and organize your own thinking.</p>
+        </div>
+        <div className="info-section mb-4">
+          <h3>What Haven isn't</h3>
+          <p>A licensed therapist, a crisis service, or a diagnostic tool. It can't read your history or
+          your tone of voice the way a person can. If you're in danger or thinking about harming yourself,
+          please contact emergency services or a crisis line right away.</p>
+        </div>
+        <div className="info-section mb-4">
+          <h3>Privacy</h3>
+          <p>Haven doesn't save what you type. Only your mood check-ins and the patterns you've noticed
+          stay on this device, in your browser's local storage — never sent anywhere.</p>
+        </div>
+        <div className="info-section mb-4">
+          <h3>If you need support now</h3>
+          <CrisisResources />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Mood chart (SVG, no chart library)
+   ============================================================ */
+
+function MoodChart({ entries }) {
+  const data = entries.slice(-14);
+  const W = 560, H = 150, padX = 14, padY = 20;
+  const stepX = data.length > 1 ? (W - padX * 2) / (data.length - 1) : 0;
+  const yFor = (v) => H - padY - ((v - 1) / 4) * (H - padY * 2);
+  const points = data.map((d, i) => ({ x: padX + i * stepX, y: yFor(d.value), ...d }));
+  const path = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+
+  if (data.length === 0) return null;
+
+  const axisLabel = "text-[9px] font-body fill-ink-faint dark:fill-ink-dark-faint";
+
+  return (
+    <div className="relative">
+      <svg className="w-full h-auto overflow-visible" viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet">
+        <line x1={padX} y1={yFor(5)} x2={W - padX} y2={yFor(5)} className="stroke-line dark:stroke-line-dark" strokeWidth="1" />
+        <line x1={padX} y1={yFor(1)} x2={W - padX} y2={yFor(1)} className="stroke-line dark:stroke-line-dark" strokeWidth="1" />
+        <text x={padX} y={yFor(5) - 6} className={axisLabel}>great</text>
+        <text x={padX} y={yFor(1) + 12} className={axisLabel}>rough</text>
+        {data.length > 1 && <path d={path} fill="none" className="stroke-moss dark:stroke-moss-dark" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
+        {points.map((p, i) => {
+          const isLast = i === points.length - 1;
+          return (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r="9" fill="transparent">
+                <title>{formatDay(p.t) + ' — ' + moodMeta(p.value).label + ' (' + p.value + '/5)'}</title>
+              </circle>
+              <circle cx={p.x} cy={p.y} r={isLast ? 5 : 3.5} className={isLast ? 'fill-moss dark:fill-moss-dark' : 'fill-paper-raised dark:fill-paper-dark-raised stroke-moss dark:stroke-moss-dark'} strokeWidth={isLast ? 0 : 2} />
+              {isLast && <text x={p.x} y={p.y - 12} textAnchor="end" className={axisLabel + ' font-bold fill-moss dark:fill-moss-dark'}>{moodMeta(p.value).label}</text>}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+/* ============================================================
+   Reflections view
+   ============================================================ */
+
+function Reflections({ state, onBack, onCheckIn }) {
+  const distortionEntries = Object.entries(state.distortionCounts || {})
+    .filter(([, n]) => n >= 1)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  const toolEntries = Object.entries(state.weights.coping || {})
+    .map(([key, w]) => ({ key, w, fb: (state.toolFeedback || {})[key] || { helped: 0, notNow: 0 } }))
+    .filter(t => t.fb.helped + t.fb.notNow > 0)
+    .sort((a, b) => b.w - a.w)
+    .slice(0, 5);
+
+  return (
+    <div className="flex-1 max-w-[720px] w-full mx-auto px-[clamp(16px,4vw,32px)] pt-6 pb-[60px]">
+      <button className="subbar-btn mb-4" onClick={onBack}><BackIcon /> Back to conversation</button>
+      <h1 className="font-display font-medium text-[1.9rem] m-0 mb-1">Reflections</h1>
+      <p className="text-ink-faint dark:text-ink-dark-faint text-[.88rem] m-0 mb-7">What's been noticed so far — kept only on this device.</p>
+
+      <div className="section">
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-3.5">
+          <h2 className="section-heading">How you've been arriving</h2>
+          <button className="btn-primary !px-4 !py-2 !text-[.85rem]" onClick={onCheckIn}>Check in</button>
+        </div>
+        {state.moodLog.length ? <MoodChart entries={state.moodLog} /> : (
+          <p className="section-empty">Nothing logged yet — check in on how you're arriving and it'll show up here.</p>
+        )}
+        {state.moodLog.length > 0 && <p className="font-mono text-[.8rem] text-ink-soft dark:text-ink-dark-soft mt-2.5">{state.moodLog.length} check-in{state.moodLog.length === 1 ? '' : 's'} logged</p>}
+      </div>
+
+      <div className="section">
+        <h2 className="section-heading mb-4">Patterns noticed</h2>
+        {distortionEntries.length ? (
+          <ul className="pattern-list">
+            {distortionEntries.map(([key, n]) => {
+              const d = DISTORTIONS.find(x => x.key === key);
+              return <li key={key}><span className="pattern-count">{n}×</span><span>{d ? d.name : key}</span></li>;
+            })}
+          </ul>
+        ) : <p className="section-empty">Nothing to report yet — patterns will show up here as we talk more.</p>}
+      </div>
+
+      <div className="section">
+        <h2 className="section-heading mb-4">What's helped</h2>
+        {toolEntries.length ? (
+          <ul className="tools-list">
+            {toolEntries.map((t, i) => (
+              <li key={t.key}><span className="tool-rank">#{i + 1}</span><span>{TOOLS[t.key] ? TOOLS[t.key].label : t.key} <span className="text-ink-faint dark:text-ink-dark-faint">— marked helpful {t.fb.helped}×</span></span></li>
+            ))}
+          </ul>
+        ) : <p className="section-empty">Once you tell Haven whether a suggestion helped, the ones that work best for you will show up here.</p>}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Chat messages
+   ============================================================ */
+
+function AgentBubble({ children }) {
+  return (
+    <div className="turn-row agent">
+      <div className="bubble agent">
+        <span className="agent-name">Haven</span>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function ReframeCard({ reframe }) {
+  return (
+    <div className="turn-row agent">
+      <div className="card card-reframe">
+        <p className="card-title">🌿 A thought pattern — {reframe.name}</p>
+        <p className="card-text">{reframe.text}</p>
+      </div>
+    </div>
+  );
+}
+
+function ToolCard({ tool, feedback, onFeedback }) {
+  return (
+    <div className="turn-row agent">
+      <div className="card card-tool">
+        <p className="card-title">{tool.icon} {tool.label}</p>
+        <p className="card-text">{tool.text}</p>
+        <div className="card-actions">
+          <button className={feedback === 'helped' ? 'given' : ''} onClick={() => onFeedback('helped')}>That helped</button>
+          <button className={feedback === 'notNow' ? 'given' : ''} onClick={() => onFeedback('notNow')}>Not right now</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CrisisCard() {
+  return (
+    <div className="turn-row agent">
+      <div className="card-crisis">
+        <p className="card-title text-crisis dark:text-crisis-dark text-[.92rem]">Let's pause here for a second.</p>
+        <p className="text-[.92rem] leading-relaxed mb-3 mt-0 text-ink dark:text-ink-dark">What you just shared matters, and it's more than I'm equipped to hold alone. You deserve
+        support from someone who can really be there — reaching out doesn't mean things are hopeless,
+        it means you're taking this seriously.</p>
+        <CrisisResources />
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Chat view
+   ============================================================ */
+
+function ChatView({ persisted, setPersisted, onOpenReflections, onOpenInfo, onCheckIn, moodToday }) {
+  const [messages, setMessages] = useState([]);
+  const [draft, setDraft] = useState('');
+  const [typing, setTyping] = useState(false);
+  const [turnCount, setTurnCount] = useState(0);
+  const threadRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  const handleVoiceResult = useCallback((text, isFinal) => {
+    setDraft(text);
+    if (isFinal && textareaRef.current) textareaRef.current.focus();
+  }, []);
+  const voice = useVoiceInput(handleVoiceResult);
+
+  useEffect(() => {
+    if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight;
+  }, [messages, typing]);
+
+  const recordDistortion = (key) => {
+    if (!key) return;
+    setPersisted(p => {
+      const counts = { ...(p.distortionCounts || {}) };
+      counts[key] = (counts[key] || 0) + 1;
+      const next = { ...p, distortionCounts: counts };
+      saveState(next);
+      return next;
+    });
+  };
+
+  const recordToolFeedback = (toolKey, positive) => {
+    setPersisted(p => {
+      const weights = { ...(p.weights.coping || {}) };
+      const cur = weights[toolKey] || 1;
+      weights[toolKey] = clamp(cur * (positive ? 1.15 : 0.85), 0.3, 4);
+      const fb = { ...(p.toolFeedback || {}) };
+      const cur2 = fb[toolKey] || { helped: 0, notNow: 0 };
+      fb[toolKey] = positive ? { ...cur2, helped: cur2.helped + 1 } : { ...cur2, notNow: cur2.notNow + 1 };
+      const next = { ...p, weights: { ...p.weights, coping: weights }, toolFeedback: fb };
+      saveState(next);
+      return next;
+    });
+  };
+
+  const setMessageFeedback = (id, value) => {
+    setMessages(ms => ms.map(m => (m.id === id ? { ...m, feedback: value } : m)));
+  };
+
+  const appendAgentTurn = (result) => {
+    if (result.type === 'crisis') {
+      setMessages(ms => [...ms, { id: uid(), role: 'crisis' }]);
+      return;
+    }
+    setMessages(ms => {
+      const additions = [{ id: uid(), role: 'agent', text: result.opener + (result.question ? ' ' + result.question : '') }];
+      if (result.reframe) additions.push({ id: uid(), role: 'reframe', reframe: result.reframe });
+      if (result.tool) additions.push({ id: uid(), role: 'tool', tool: result.tool });
+      return [...ms, ...additions];
+    });
+    if (result.distortionKey) recordDistortion(result.distortionKey);
+  };
+
+  const handleSend = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setMessages(ms => [...ms, { id: uid(), role: 'user', text }]);
+    setDraft('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+    const result = buildResponse(text, persisted.weights.coping, turnCount);
+    setTurnCount(t => t + 1);
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+      appendAgentTurn(result);
+    }, 550 + Math.random() * 500);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  };
+
+  const handleMicClick = () => {
+    if (voice.listening) voice.stop(); else voice.start();
+  };
+
+  const newConversation = () => { setMessages([]); setTurnCount(0); };
+
+  return (
+    <div className="flex-1 flex flex-col max-w-[720px] w-full mx-auto min-h-0">
+      <div className="flex items-center justify-between px-[clamp(16px,4vw,32px)] pt-2">
+        <button className="subbar-btn" onClick={newConversation}>Start fresh</button>
+        <button className="subbar-btn" onClick={onOpenReflections}><ChartIcon /> Reflections</button>
+      </div>
+
+      <div className="stitch-line flex-1 overflow-y-auto pr-[clamp(16px,4vw,32px)] pt-5 pb-2.5 flex flex-col" ref={threadRef}>
+        {messages.length === 0 && (
+          <div className="flex-1 flex items-center justify-center text-center text-ink-faint dark:text-ink-dark-faint px-5 py-10">
+            <p className="max-w-[320px] text-[.92rem] leading-relaxed mx-auto">Say whatever's on your mind — typed or spoken. Haven will listen, ask a question or two, and
+            offer something to try if it seems useful.</p>
+          </div>
+        )}
+        {messages.map(m => {
+          if (m.role === 'user') return <div key={m.id} className="turn-row user"><div className="bubble user">{m.text}</div></div>;
+          if (m.role === 'agent') return <AgentBubble key={m.id}>{m.text}</AgentBubble>;
+          if (m.role === 'reframe') return <ReframeCard key={m.id} reframe={m.reframe} />;
+          if (m.role === 'tool') return <ToolCard key={m.id} tool={m.tool} feedback={m.feedback} onFeedback={(v) => { setMessageFeedback(m.id, v); recordToolFeedback(m.tool.key, v === 'helped'); }} />;
+          if (m.role === 'crisis') return <CrisisCard key={m.id} />;
+          return null;
+        })}
+        {typing && (
+          <div className="turn-row agent">
+            <div className="bubble agent flex items-center gap-[5px] py-1">
+              <span className="typing-dot"></span>
+              <span className="typing-dot [animation-delay:150ms]"></span>
+              <span className="typing-dot [animation-delay:300ms]"></span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="px-[clamp(16px,4vw,32px)] pb-[clamp(14px,3vw,22px)] pt-2.5 border-t border-line dark:border-line-dark bg-paper dark:bg-paper-dark">
+        {voice.error === 'not-allowed' && <p className="text-[.78rem] text-crisis dark:text-crisis-dark mb-2">Microphone access was blocked — you can still type.</p>}
+        <div className="flex items-end gap-2 bg-paper-raised dark:bg-paper-dark-raised border border-line dark:border-line-dark rounded-[22px] pl-4 pr-2 py-2 shadow-s">
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            className="flex-1 resize-none border-0 outline-none bg-transparent text-ink dark:text-ink-dark text-[.95rem] leading-relaxed py-2 max-h-[140px] placeholder:text-ink-faint dark:placeholder:text-ink-dark-faint"
+            value={draft}
+            placeholder={voice.listening ? 'Listening…' : "Type how you're feeling…"}
+            onChange={e => { setDraft(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px'; }}
+            onKeyDown={handleKeyDown}
+          />
+          {voice.supported && (
+            <button className={'mic-btn' + (voice.listening ? ' listening' : '')} onClick={handleMicClick} aria-label={voice.listening ? 'Stop listening' : 'Speak instead of typing'}>
+              {voice.listening && <span className="mic-ring" aria-hidden="true"></span>}
+              <MicIcon />
+            </button>
+          )}
+          <button className="send-btn" onClick={handleSend} disabled={!draft.trim()} aria-label="Send">
+            <SendIcon />
+          </button>
+        </div>
+        <p className="text-center text-[.74rem] text-ink-faint dark:text-ink-dark-faint mt-2.5">
+          Haven is a supportive tool, not a therapist. In crisis? <a href="tel:988">Call or text 988</a> (US). <button className="underline cursor-pointer bg-transparent border-0 text-inherit p-0" onClick={onOpenInfo}>More info</button>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Top bar
+   ============================================================ */
+
+function TopBar({ theme, onToggleTheme, onOpenInfo, moodToday, onCheckIn, view, onGoChat }) {
+  return (
+    <div className="flex items-center justify-between px-[clamp(16px,4vw,32px)] py-3.5 border-b border-line dark:border-line-dark bg-paper dark:bg-paper-dark sticky top-0 z-20">
+      <a className="flex items-center gap-2 no-underline text-ink dark:text-ink-dark" href="#" onClick={e => { e.preventDefault(); onGoChat(); }}>
+        <BrandMark className="w-5 h-5 shrink-0" />
+        <span className="font-display italic font-medium text-[1.28rem] tracking-wide">Haven</span>
+      </a>
+      <div className="flex items-center gap-1.5">
+        <button className="mood-chip" onClick={onCheckIn}>
+          {moodToday ? <React.Fragment>{moodMeta(moodToday.value).emoji} Logged today</React.Fragment> : 'Check in'}
+        </button>
+        <button className="icon-btn" onClick={onToggleTheme} aria-label="Toggle theme">
+          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+        </button>
+        <button className="icon-btn" onClick={onOpenInfo} aria-label="About Haven">
+          <InfoIcon />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   App
+   ============================================================ */
+
+function App() {
+  const [persisted, setPersistedRaw] = useState(loadState());
+  const [theme, setTheme] = useState(() => {
+    try {
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored) return stored;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch (e) { return 'light'; }
+  });
+  const [view, setView] = useState('chat');
+  const [showInfo, setShowInfo] = useState(false);
+  const [showCheckIn, setShowCheckIn] = useState(false);
+
+  const setPersisted = (updater) => setPersistedRaw(prev => (typeof updater === 'function' ? updater(prev) : updater));
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+  }, [theme]);
+
+  const handleBegin = (name, mood) => {
+    setPersisted(p => {
+      const next = {
+        ...p,
+        onboarded: true,
+        name,
+        moodLog: [...p.moodLog, { t: Date.now(), value: mood.value }]
+      };
+      saveState(next);
+      return next;
+    });
+  };
+
+  const handleCheckIn = (value) => {
+    setPersisted(p => {
+      const next = { ...p, moodLog: [...p.moodLog, { t: Date.now(), value }].slice(-60) };
+      saveState(next);
+      return next;
+    });
+    setShowCheckIn(false);
+  };
+
+  const todayStr = new Date().toDateString();
+  const moodToday = useMemo(() => {
+    const todays = persisted.moodLog.filter(m => new Date(m.t).toDateString() === todayStr);
+    return todays.length ? todays[todays.length - 1] : null;
+  }, [persisted.moodLog]);
+
+  if (!persisted.onboarded) {
+    return <Onboarding onBegin={handleBegin} />;
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen min-h-dvh">
+      <TopBar
+        theme={theme}
+        onToggleTheme={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
+        onOpenInfo={() => setShowInfo(true)}
+        moodToday={moodToday}
+        onCheckIn={() => setShowCheckIn(true)}
+        view={view}
+        onGoChat={() => setView('chat')}
+      />
+      {view === 'chat' ? (
+        <ChatView
+          persisted={persisted}
+          setPersisted={setPersisted}
+          onOpenReflections={() => setView('reflections')}
+          onOpenInfo={() => setShowInfo(true)}
+          onCheckIn={() => setShowCheckIn(true)}
+          moodToday={moodToday}
+        />
+      ) : (
+        <Reflections state={persisted} onBack={() => setView('chat')} onCheckIn={() => setShowCheckIn(true)} />
+      )}
+      {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
+      {showCheckIn && <MoodCheckInModal onClose={() => setShowCheckIn(false)} onPick={handleCheckIn} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
