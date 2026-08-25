@@ -9,290 +9,116 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --paper: #FAF6EF;
-    --paper-raised: #FFFFFF;
-    --ink: #2B2A28;
-    --ink-soft: #5B5750;
-    --ink-faint: #928C7F;
-    --line: #E4DDCF;
-    --denim: #3A5068;
-    --denim-deep: #253647;
-    --denim-fill: #E4EAEF;
-    --moss: #4C5D4A;
-    --moss-fill: #DCE5D6;
-    --ochre: #A8672A;
-    --ochre-fill: #F3E1C4;
-    --crisis: #A03A2A;
-    --crisis-fill: #F6DAD3;
-    --crisis-line: #E3B4A6;
-    --shadow-s: 0 1px 2px rgba(43,42,40,.07);
-    --shadow-m: 0 10px 30px -14px rgba(43,42,40,.28);
-    --radius-s: 8px;
-    --radius-m: 14px;
-    --radius-l: 22px;
-    --font-display: 'Newsreader', Georgia, serif;
-    --font-body: 'Karla', system-ui, -apple-system, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-    color-scheme: light;
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          paper: { DEFAULT: '#FAF6EF', raised: '#FFFFFF', dark: '#1B1E24', 'dark-raised': '#232730' },
+          ink: { DEFAULT: '#2B2A28', soft: '#5B5750', faint: '#928C7F', dark: '#EDE8DE', 'dark-soft': '#B8B2A4', 'dark-faint': '#7C8089' },
+          line: { DEFAULT: '#E4DDCF', dark: '#333947' },
+          denim: { DEFAULT: '#3A5068', deep: '#253647', dark: '#8CA6BE', 'dark-deep': '#B7CBDC' },
+          moss: { DEFAULT: '#4C5D4A', fill: '#DCE5D6', border: '#CBD8C4', dark: '#93B48B', 'dark-fill': '#29352A', 'dark-border': '#3D4A3B' },
+          ochre: { DEFAULT: '#A8672A', fill: '#F3E1C4', border: '#E3C79C', dark: '#E3A85F', 'dark-fill': '#3B2F1C', 'dark-border': '#4A3D28' },
+          crisis: { DEFAULT: '#A03A2A', fill: '#F6DAD3', line: '#E3B4A6', dark: '#E2897A', 'dark-fill': '#3B241F', 'dark-line': '#5C332B' }
+        },
+        fontFamily: {
+          display: ['Newsreader', 'Georgia', 'serif'],
+          body: ['Karla', 'system-ui', '-apple-system', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace']
+        },
+        boxShadow: {
+          s: '0 1px 2px rgba(43,42,40,.07)',
+          m: '0 10px 30px -14px rgba(43,42,40,.28)'
+        },
+        keyframes: {
+          breathe: {
+            '0%': { transform: 'scale(1)', opacity: .6 },
+            '45%': { transform: 'scale(1.45)', opacity: .05 },
+            '46%': { transform: 'scale(1.45)', opacity: 0 },
+            '100%': { transform: 'scale(1)', opacity: .6 }
+          },
+          dotbounce: {
+            '0%, 60%, 100%': { transform: 'translateY(0)', opacity: .5 },
+            '30%': { transform: 'translateY(-4px)', opacity: 1 }
+          }
+        },
+        animation: {
+          breathe: 'breathe 6.2s ease-in-out infinite',
+          dotbounce: 'dotbounce 1.2s ease-in-out infinite'
+        }
+      }
+    }
+  };
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    body { @apply bg-paper dark:bg-paper-dark text-ink dark:text-ink-dark font-body antialiased transition-colors duration-300 m-0; }
+    button, textarea, input { font-family: inherit; }
+    a { @apply text-denim dark:text-denim-dark; }
+    ::selection { @apply bg-ochre-fill dark:bg-ochre-dark-fill; }
+    :focus-visible { @apply outline outline-2 outline-denim dark:outline-denim-dark outline-offset-2 rounded; }
   }
-  [data-theme="dark"] {
-    --paper: #1B1E24;
-    --paper-raised: #232730;
-    --ink: #EDE8DE;
-    --ink-soft: #B8B2A4;
-    --ink-faint: #7C8089;
-    --line: #333947;
-    --denim: #8CA6BE;
-    --denim-deep: #B7CBDC;
-    --denim-fill: #29323D;
-    --moss: #93B48B;
-    --moss-fill: #29352A;
-    --ochre: #E3A85F;
-    --ochre-fill: #3B2F1C;
-    --crisis: #E2897A;
-    --crisis-fill: #3B241F;
-    --crisis-line: #5C332B;
-    --shadow-s: 0 1px 2px rgba(0,0,0,.3);
-    --shadow-m: 0 10px 30px -14px rgba(0,0,0,.6);
-    color-scheme: dark;
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
-    transition: background .3s ease, color .3s ease;
-  }
-  #root { min-height: 100%; display: flex; flex-direction: column; }
-  button { font-family: inherit; }
-  textarea { font-family: inherit; }
-  :focus-visible { outline: 2px solid var(--denim); outline-offset: 2px; border-radius: 4px; }
-  a { color: var(--denim); }
-  ::selection { background: var(--ochre-fill); }
+  @layer components {
+    /* buttons & chips */
+    .icon-btn { @apply inline-flex items-center justify-center w-9 h-9 rounded-full border border-transparent bg-transparent text-ink-soft dark:text-ink-dark-soft cursor-pointer transition-colors hover:bg-line dark:hover:bg-line-dark hover:text-ink dark:hover:text-ink-dark; }
+    .mood-chip { @apply inline-flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-full border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink-soft dark:text-ink-dark-soft text-[.85rem] cursor-pointer shadow-s hover:border-denim dark:hover:border-denim-dark hover:text-ink dark:hover:text-ink-dark; }
+    .mood-opt { @apply px-[15px] py-[9px] rounded-full border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink-soft dark:text-ink-dark-soft text-[.88rem] cursor-pointer transition-colors hover:border-denim dark:hover:border-denim-dark hover:text-ink dark:hover:text-ink-dark; }
+    .mood-opt.selected { @apply bg-denim dark:bg-denim-dark border-denim dark:border-denim-dark text-white; }
+    .btn-primary { @apply inline-flex items-center gap-2 px-[26px] py-3 rounded-full border-0 bg-denim dark:bg-denim-dark text-white text-[.98rem] font-semibold cursor-pointer shadow-s transition-transform hover:bg-denim-deep dark:hover:bg-denim-dark-deep hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0; }
+    .subbar-btn { @apply bg-transparent border-0 text-ink-faint dark:text-ink-dark-faint text-[.8rem] cursor-pointer px-1 py-1.5 inline-flex items-center gap-1 hover:text-denim dark:hover:text-denim-dark; }
 
-  .app-shell { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+    /* chat thread */
+    .stitch-line { @apply relative pl-5 before:content-[''] before:absolute before:left-1 before:top-1.5 before:bottom-1.5 before:w-px before:bg-line dark:before:bg-line-dark; }
+    .turn-row { @apply relative flex mb-[18px] before:content-[''] before:absolute before:-left-5 before:top-2 before:w-[9px] before:h-[9px] before:rounded-full before:bg-paper dark:before:bg-paper-dark before:border-2; }
+    .turn-row.user { @apply justify-end before:border-denim dark:before:border-denim-dark; }
+    .turn-row.agent { @apply before:border-moss dark:before:border-moss-dark; }
+    .bubble { @apply max-w-[82%] sm:max-w-[82%] px-[15px] py-[11px] rounded-2xl leading-relaxed text-[.95rem] shadow-s; }
+    .bubble.user { @apply bg-denim dark:bg-denim-dark text-white rounded-br-[4px] max-w-[92%]; }
+    .bubble.agent { @apply bg-paper-raised dark:bg-paper-dark-raised border border-line dark:border-line-dark rounded-bl-[4px] max-w-[92%]; }
+    .agent-name { @apply block text-[.72rem] font-bold tracking-wide uppercase text-moss dark:text-moss-dark mb-1; }
+    .typing-dot { @apply w-1.5 h-1.5 rounded-full bg-ink-faint dark:bg-ink-dark-faint animate-dotbounce motion-reduce:animate-none motion-reduce:opacity-80; }
 
-  /* ---------- Top bar ---------- */
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px clamp(16px, 4vw, 32px);
-    border-bottom: 1px solid var(--line);
-    background: var(--paper);
-    position: sticky; top: 0; z-index: 20;
-  }
-  .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink); }
-  .brand-mark { width: 20px; height: 20px; flex-shrink: 0; }
-  .brand-name { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 1.28rem; letter-spacing: .01em; }
-  .topbar-actions { display: flex; align-items: center; gap: 6px; }
-  .icon-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 36px; height: 36px; border-radius: 999px; border: 1px solid transparent;
-    background: transparent; color: var(--ink-soft); cursor: pointer; font-size: 1rem;
-    transition: background .15s ease, color .15s ease;
-  }
-  .icon-btn:hover { background: var(--line); color: var(--ink); }
-  .mood-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px 6px 10px; border-radius: 999px; border: 1px solid var(--line);
-    background: var(--paper-raised); color: var(--ink-soft); font-size: .85rem; cursor: pointer;
-    box-shadow: var(--shadow-s);
-  }
-  .mood-chip:hover { border-color: var(--denim); color: var(--ink); }
+    /* cards */
+    .card { @apply max-w-[92%] rounded-2xl px-4 py-3.5 shadow-s border; }
+    .card-reframe { @apply bg-moss-fill dark:bg-moss-dark-fill border-moss-border dark:border-moss-dark-border; }
+    .card-tool { @apply bg-ochre-fill dark:bg-ochre-dark-fill border-ochre-border dark:border-ochre-dark-border; }
+    .card-title { @apply flex items-center gap-[7px] font-bold text-[.84rem] mb-1.5 text-ink dark:text-ink-dark; }
+    .card-text { @apply text-[.92rem] leading-relaxed m-0 text-ink dark:text-ink-dark; }
+    .card-actions { @apply flex gap-2 mt-[11px]; }
+    .card-actions button { @apply text-[.78rem] px-3 py-1.5 rounded-full border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink-soft dark:text-ink-dark-soft cursor-pointer hover:border-ink-soft hover:text-ink dark:hover:text-ink-dark; }
+    .card-actions button.given { @apply bg-ink dark:bg-ink-dark text-paper dark:text-paper-dark border-ink dark:border-ink-dark; }
 
-  /* ---------- Onboarding ---------- */
-  .onboard-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
-  .onboard-card {
-    max-width: 460px; width: 100%; text-align: center;
-  }
-  .onboard-mark { width: 44px; height: 44px; margin: 0 auto 18px; }
-  .onboard-title { font-family: var(--font-display); font-size: 2.4rem; font-weight: 500; margin: 0 0 6px; }
-  .onboard-sub { font-family: var(--font-display); font-style: italic; color: var(--ink-soft); font-size: 1.15rem; margin: 0 0 22px; }
-  .onboard-body { color: var(--ink-soft); line-height: 1.6; font-size: .96rem; margin: 0 0 28px; }
-  .field-label { display: block; text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); margin: 0 0 8px; }
-  .name-input {
-    width: 100%; padding: 12px 14px; border-radius: var(--radius-s); border: 1px solid var(--line);
-    background: var(--paper-raised); color: var(--ink); font-size: .95rem; margin-bottom: 26px;
-  }
-  .mood-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 30px; }
-  .mood-opt {
-    padding: 9px 15px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper-raised);
-    color: var(--ink-soft); font-size: .88rem; cursor: pointer; transition: all .15s ease;
-  }
-  .mood-opt:hover { border-color: var(--denim); color: var(--ink); }
-  .mood-opt.selected { background: var(--denim); border-color: var(--denim); color: #fff; }
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 26px; border-radius: 999px; border: none; background: var(--denim); color: #fff;
-    font-size: .98rem; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-s);
-    transition: transform .15s ease, background .15s ease;
-  }
-  .btn-primary:hover { background: var(--denim-deep); transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-  .crisis-inline {
-    margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line);
-    font-size: .82rem; color: var(--ink-faint); line-height: 1.6;
-  }
-  .crisis-inline a { font-weight: 600; }
+    /* crisis */
+    .card-crisis { @apply max-w-[92%] bg-crisis-fill dark:bg-crisis-dark-fill border border-crisis-line dark:border-crisis-dark-line rounded-2xl px-[18px] py-4 shadow-m; }
+    .crisis-links { @apply flex flex-col gap-[7px]; }
+    .crisis-link { @apply flex items-center justify-between gap-2.5 px-[13px] py-[9px] rounded-lg bg-paper-raised dark:bg-paper-dark-raised border border-crisis-line dark:border-crisis-dark-line text-ink dark:text-ink-dark no-underline text-[.87rem]; }
 
-  /* ---------- Chat ---------- */
-  .chat-wrap { flex: 1; display: flex; flex-direction: column; max-width: 720px; width: 100%; margin: 0 auto; min-height: 0; }
-  .chat-subbar { display: flex; align-items: center; justify-content: space-between; padding: 8px clamp(16px,4vw,32px) 0; }
-  .subbar-btn { background: none; border: none; color: var(--ink-faint); font-size: .8rem; cursor: pointer; padding: 6px 4px; }
-  .subbar-btn:hover { color: var(--denim); }
-  .thread {
-    flex: 1; overflow-y: auto; padding: 20px clamp(16px, 4vw, 32px) 10px;
-    display: flex; flex-direction: column;
-  }
-  .stitch { position: relative; padding-left: 20px; }
-  .stitch::before {
-    content: ''; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 1px;
-    background: var(--line);
-  }
-  .turn { position: relative; margin-bottom: 18px; display: flex; }
-  .turn::before {
-    content: ''; position: absolute; left: -20px; top: 8px; width: 9px; height: 9px; border-radius: 50%;
-    background: var(--paper); border: 2px solid var(--line);
-  }
-  .turn.user::before { border-color: var(--denim); }
-  .turn.agent::before { border-color: var(--moss); }
-  .turn.user { justify-content: flex-end; }
-  .bubble {
-    max-width: 82%; padding: 11px 15px; border-radius: var(--radius-m); line-height: 1.55; font-size: .95rem;
-    box-shadow: var(--shadow-s);
-  }
-  .bubble.user { background: var(--denim); color: #fff; border-bottom-right-radius: 4px; }
-  .bubble.agent { background: var(--paper-raised); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
-  .agent-name { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--moss); margin-bottom: 4px; }
+    /* composer */
+    .mic-btn { @apply relative shrink-0 w-10 h-10 rounded-full border border-line dark:border-line-dark bg-paper dark:bg-paper-dark text-ink-soft dark:text-ink-dark-soft cursor-pointer flex items-center justify-center text-[1.05rem] disabled:opacity-35 disabled:cursor-not-allowed; }
+    .mic-btn.listening { @apply text-white bg-denim dark:bg-denim-dark border-denim dark:border-denim-dark; }
+    .mic-ring { @apply absolute -inset-1.5 rounded-full border-2 border-denim dark:border-denim-dark animate-breathe motion-reduce:animate-none motion-reduce:opacity-35; }
+    .send-btn { @apply shrink-0 w-10 h-10 rounded-full border-0 bg-ink dark:bg-ink-dark text-paper dark:text-paper-dark cursor-pointer flex items-center justify-center text-[1.05rem] transition-colors disabled:opacity-30 disabled:cursor-not-allowed; }
 
-  .card { max-width: 88%; border-radius: var(--radius-m); padding: 14px 16px; box-shadow: var(--shadow-s); border: 1px solid var(--line); }
-  .card-reframe { background: var(--moss-fill); border-color: color-mix(in srgb, var(--moss) 30%, var(--line)); }
-  .card-tool { background: var(--ochre-fill); border-color: color-mix(in srgb, var(--ochre) 30%, var(--line)); }
-  .card-title { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: .84rem; margin: 0 0 6px; color: var(--ink); }
-  .card-text { font-size: .92rem; line-height: 1.55; margin: 0; color: var(--ink); }
-  .card-actions { display: flex; gap: 8px; margin-top: 11px; }
-  .card-actions button {
-    font-size: .78rem; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
-    background: var(--paper-raised); color: var(--ink-soft); cursor: pointer;
-  }
-  .card-actions button:hover { border-color: var(--ink-soft); color: var(--ink); }
-  .card-actions button.given { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    /* reflections */
+    .section { @apply bg-paper-raised dark:bg-paper-dark-raised border border-line dark:border-line-dark rounded-2xl px-[22px] py-5 mb-[18px] shadow-s; }
+    .section-heading { @apply text-[.82rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint font-bold m-0; }
+    .section-empty { @apply text-ink-faint dark:text-ink-dark-faint text-[.88rem] leading-relaxed; }
+    .pattern-list, .tools-list { @apply list-none m-0 p-0 flex flex-col gap-2.5; }
+    .pattern-list li, .tools-list li { @apply flex items-baseline gap-2.5 text-[.9rem] leading-relaxed; }
+    .pattern-count { @apply font-mono text-[.78rem] text-moss dark:text-moss-dark shrink-0 min-w-[20px]; }
+    .tool-rank { @apply font-mono text-[.78rem] text-ochre dark:text-ochre-dark shrink-0; }
 
-  .card-crisis { max-width: 92%; background: var(--crisis-fill); border: 1px solid var(--crisis-line); border-radius: var(--radius-m); padding: 16px 18px; box-shadow: var(--shadow-m); }
-  .card-crisis .card-title { color: var(--crisis); font-size: .92rem; }
-  .card-crisis p { font-size: .92rem; line-height: 1.6; margin: 0 0 12px; color: var(--ink); }
-  .crisis-links { display: flex; flex-direction: column; gap: 7px; }
-  .crisis-link {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 9px 13px; border-radius: var(--radius-s); background: var(--paper-raised);
-    border: 1px solid var(--crisis-line); color: var(--ink); text-decoration: none; font-size: .87rem;
-  }
-  .crisis-link strong { font-weight: 700; }
-  .crisis-link span.arrow { color: var(--crisis); font-weight: 700; }
-
-  .typing-row { display: flex; align-items: center; gap: 5px; padding: 4px 0 4px 2px; }
-  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); animation: bounce 1.2s infinite ease-in-out; }
-  .typing-dot:nth-child(2) { animation-delay: .15s; }
-  .typing-dot:nth-child(3) { animation-delay: .3s; }
-  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
-
-  .empty-thread { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--ink-faint); padding: 40px 20px; }
-  .empty-thread p { max-width: 320px; font-size: .92rem; line-height: 1.6; }
-
-  /* ---------- Composer ---------- */
-  .composer-wrap { padding: 10px clamp(16px, 4vw, 32px) clamp(14px, 3vw, 22px); border-top: 1px solid var(--line); background: var(--paper); }
-  .mic-error { font-size: .78rem; color: var(--crisis); margin: 0 0 8px; }
-  .composer {
-    display: flex; align-items: flex-end; gap: 8px;
-    background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius-l);
-    padding: 8px 8px 8px 16px; box-shadow: var(--shadow-s);
-  }
-  .composer textarea {
-    flex: 1; resize: none; border: none; outline: none; background: transparent; color: var(--ink);
-    font-size: .95rem; line-height: 1.5; padding: 8px 0; max-height: 140px;
-  }
-  .composer textarea::placeholder { color: var(--ink-faint); }
-  .mic-btn {
-    position: relative; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
-    border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
-  }
-  .mic-btn:disabled { opacity: .35; cursor: not-allowed; }
-  .mic-btn.listening { color: #fff; background: var(--denim); border-color: var(--denim); }
-  .mic-ring {
-    position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--denim);
-    animation: breathe 6.2s ease-in-out infinite;
-  }
-  @keyframes breathe {
-    0% { transform: scale(1); opacity: .6; }
-    45% { transform: scale(1.45); opacity: .05; }
-    46% { transform: scale(1.45); opacity: 0; }
-    100% { transform: scale(1); opacity: .6; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .mic-ring { animation: none; opacity: .35; }
-    .typing-dot { animation: none; opacity: .8; }
-  }
-  .send-btn {
-    flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: none;
-    background: var(--ink); color: var(--paper); cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 1.05rem; transition: background .15s ease;
-  }
-  .send-btn:disabled { opacity: .3; cursor: not-allowed; }
-  .safety-note { text-align: center; font-size: .74rem; color: var(--ink-faint); margin: 10px 0 0; }
-  .safety-note button { background: none; border: none; color: var(--ink-faint); text-decoration: underline; cursor: pointer; font-size: inherit; padding: 0; }
-
-  /* ---------- Reflections ---------- */
-  .reflections-wrap { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 24px clamp(16px,4vw,32px) 60px; }
-  .reflections-wrap h1 { font-family: var(--font-display); font-weight: 500; font-size: 1.9rem; margin: 0 0 4px; }
-  .reflections-sub { color: var(--ink-faint); font-size: .88rem; margin: 0 0 28px; }
-  .section { background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 20px 22px; margin-bottom: 18px; box-shadow: var(--shadow-s); }
-  .section h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); margin: 0 0 16px; font-weight: 700; }
-  .section-empty { color: var(--ink-faint); font-size: .88rem; line-height: 1.6; }
-  .checkin-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .streak { font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
-  .pattern-list, .tools-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-  .pattern-list li, .tools-list li { display: flex; align-items: baseline; gap: 10px; font-size: .9rem; line-height: 1.55; }
-  .pattern-count { font-family: var(--font-mono); font-size: .78rem; color: var(--moss); flex-shrink: 0; min-width: 20px; }
-  .tool-rank { font-family: var(--font-mono); font-size: .78rem; color: var(--ochre); flex-shrink: 0; }
-
-  /* ---------- Modals ---------- */
-  .overlay {
-    position: fixed; inset: 0; background: rgba(20,18,15,.42); display: flex; align-items: center; justify-content: center;
-    padding: 20px; z-index: 100;
-  }
-  .modal {
-    background: var(--paper-raised); border-radius: var(--radius-l); padding: 26px 26px 22px; max-width: 420px; width: 100%;
-    box-shadow: var(--shadow-m); max-height: 86vh; overflow-y: auto;
-  }
-  .modal h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.35rem; margin: 0 0 4px; }
-  .modal .modal-close { float: right; background: none; border: none; color: var(--ink-faint); font-size: 1.1rem; cursor: pointer; }
-  .mood-scale { display: flex; justify-content: space-between; gap: 6px; margin: 18px 0 4px; }
-  .mood-scale button {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px;
-    border-radius: var(--radius-s); border: 1px solid var(--line); background: var(--paper); cursor: pointer; color: var(--ink-soft);
-  }
-  .mood-scale button:hover { border-color: var(--denim); color: var(--ink); }
-  .mood-scale .emoji { font-size: 1.4rem; }
-  .mood-scale .lbl { font-size: .68rem; }
-  .info-section { margin-bottom: 16px; }
-  .info-section h3 { font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-faint); margin: 0 0 6px; }
-  .info-section p { font-size: .88rem; line-height: 1.6; color: var(--ink-soft); margin: 0; }
-
-  /* ---------- Mood chart ---------- */
-  .chart-wrap { position: relative; }
-  .chart-wrap svg { width: 100%; height: auto; overflow: visible; }
-  .chart-axis-label { font-size: 9px; fill: var(--ink-faint); font-family: var(--font-body); }
-  .chart-point { fill: var(--paper-raised); stroke: var(--moss); stroke-width: 2; }
-  .chart-point-last { fill: var(--moss); }
-
-  @media (max-width: 560px) {
-    .onboard-title { font-size: 2rem; }
-    .bubble, .card { max-width: 92%; }
+    /* modals */
+    .overlay { @apply fixed inset-0 bg-black/40 flex items-center justify-center p-5 z-[100]; }
+    .modal { @apply bg-paper-raised dark:bg-paper-dark-raised rounded-[22px] px-[26px] pt-[26px] pb-[22px] max-w-[420px] w-full shadow-m max-h-[86vh] overflow-y-auto; }
+    .modal-close { @apply float-right bg-transparent border-0 text-ink-faint dark:text-ink-dark-faint text-lg cursor-pointer; }
+    .modal-title { @apply font-display font-medium text-[1.35rem] m-0; }
+    .mood-scale-btn { @apply flex-1 flex flex-col items-center gap-1.5 px-1 py-3 rounded-lg border border-line dark:border-line-dark bg-paper dark:bg-paper-dark cursor-pointer text-ink-soft dark:text-ink-dark-soft hover:border-denim dark:hover:border-denim-dark hover:text-ink dark:hover:text-ink-dark; }
+    .info-section h3 { @apply text-[.82rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint mb-1.5; }
+    .info-section p { @apply text-[.88rem] leading-relaxed text-ink-soft dark:text-ink-dark-soft m-0; }
   }
 </style>
 </head>
@@ -579,11 +405,11 @@ const BackIcon = () => (
 function CrisisResources() {
   return (
     <div className="crisis-links">
-      <a className="crisis-link" href="tel:988"><span><strong>Call 988</strong> — Suicide &amp; Crisis Lifeline (US)</span><span className="arrow">→</span></a>
-      <a className="crisis-link" href="sms:988"><span><strong>Text 988</strong> — Suicide &amp; Crisis Lifeline (US)</span><span className="arrow">→</span></a>
-      <a className="crisis-link" href="sms:741741&body=HOME"><span><strong>Text HOME to 741741</strong> — Crisis Text Line</span><span className="arrow">→</span></a>
-      <a className="crisis-link" href="https://findahelpline.com" target="_blank" rel="noopener noreferrer"><span><strong>findahelpline.com</strong> — outside the US</span><span className="arrow">→</span></a>
-      <a className="crisis-link" href="tel:911"><span><strong>Call 911</strong> — if you're in immediate danger</span><span className="arrow">→</span></a>
+      <a className="crisis-link" href="tel:988"><span><strong className="font-bold">Call 988</strong> — Suicide &amp; Crisis Lifeline (US)</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="sms:988"><span><strong className="font-bold">Text 988</strong> — Suicide &amp; Crisis Lifeline (US)</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="sms:741741&body=HOME"><span><strong className="font-bold">Text HOME to 741741</strong> — Crisis Text Line</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="https://findahelpline.com" target="_blank" rel="noopener noreferrer"><span><strong className="font-bold">findahelpline.com</strong> — outside the US</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
+      <a className="crisis-link" href="tel:911"><span><strong className="font-bold">Call 911</strong> — if you're in immediate danger</span><span className="text-crisis dark:text-crisis-dark font-bold">→</span></a>
     </div>
   );
 }
@@ -603,19 +429,19 @@ function Onboarding({ onBegin }) {
     { key: 'okay', label: 'Okay, just want to talk', value: 4 }
   ];
   return (
-    <div className="onboard-wrap">
-      <div className="onboard-card">
-        <BrandMark className="onboard-mark" />
-        <h1 className="onboard-title">Haven</h1>
-        <p className="onboard-sub">a quiet place to think out loud</p>
-        <p className="onboard-body">
+    <div className="flex-1 flex items-center justify-center px-5 py-8">
+      <div className="max-w-[460px] w-full text-center">
+        <BrandMark className="w-11 h-11 mx-auto mb-[18px] text-ink dark:text-ink-dark" />
+        <h1 className="font-display text-4xl font-medium m-0 mb-1.5">Haven</h1>
+        <p className="font-display italic text-ink-soft dark:text-ink-dark-soft text-[1.15rem] m-0 mb-[22px]">a quiet place to think out loud</p>
+        <p className="text-ink-soft dark:text-ink-dark-soft leading-relaxed text-[.96rem] m-0 mb-7">
           This isn't a therapist, and it won't diagnose you. Think of it as a space to sort through
           what's loud in your head — before, between, or instead of a session with someone licensed to help.
         </p>
-        <label className="field-label" htmlFor="name-input">What should I call you? (optional, stays on this device)</label>
-        <input id="name-input" className="name-input" value={name} onChange={e => setName(e.target.value)} placeholder="Just a first name is fine" maxLength={40} />
-        <label className="field-label" style={{ textAlign: 'center' }}>How are you arriving today?</label>
-        <div className="mood-grid">
+        <label className="block text-left text-[.78rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint mb-2" htmlFor="name-input">What should I call you? (optional, stays on this device)</label>
+        <input id="name-input" className="w-full px-3.5 py-3 rounded-lg border border-line dark:border-line-dark bg-paper-raised dark:bg-paper-dark-raised text-ink dark:text-ink-dark text-[.95rem] mb-6 placeholder:text-ink-faint dark:placeholder:text-ink-dark-faint" value={name} onChange={e => setName(e.target.value)} placeholder="Just a first name is fine" maxLength={40} />
+        <label className="block text-center text-[.78rem] uppercase tracking-wide text-ink-faint dark:text-ink-dark-faint mb-2">How are you arriving today?</label>
+        <div className="flex flex-wrap gap-2 justify-center mb-[30px]">
           {moods.map(m => (
             <button key={m.key} type="button" className={'mood-opt' + (mood && mood.key === m.key ? ' selected' : '')} onClick={() => setMood(m)}>
               {m.label}
@@ -625,10 +451,10 @@ function Onboarding({ onBegin }) {
         <button className="btn-primary" disabled={!mood} onClick={() => onBegin(name.trim(), mood)}>
           Begin →
         </button>
-        <div className="crisis-inline">
+        <div className="mt-[30px] pt-[18px] border-t border-line dark:border-line-dark text-[.82rem] text-ink-faint dark:text-ink-dark-faint leading-relaxed">
           If you're thinking about suicide or self-harm, please reach out now: call or text{' '}
-          <a href="tel:988">988</a> (US), or find a helpline at{' '}
-          <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer">findahelpline.com</a>.
+          <a className="font-semibold" href="tel:988">988</a> (US), or find a helpline at{' '}
+          <a className="font-semibold" href="https://findahelpline.com" target="_blank" rel="noopener noreferrer">findahelpline.com</a>.
         </div>
       </div>
     </div>
@@ -644,13 +470,13 @@ function MoodCheckInModal({ onClose, onPick }) {
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Mood check-in">
         <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
-        <h2>How are you arriving?</h2>
-        <p style={{ color: 'var(--ink-faint)', fontSize: '.85rem', margin: '4px 0 0' }}>This is just for you — it stays on this device.</p>
-        <div className="mood-scale">
+        <h2 className="modal-title">How are you arriving?</h2>
+        <p className="text-ink-faint dark:text-ink-dark-faint text-[.85rem] mt-1 mb-0">This is just for you — it stays on this device.</p>
+        <div className="flex justify-between gap-1.5 mt-[18px] mb-1">
           {MOOD_SCALE.map(m => (
-            <button key={m.value} onClick={() => onPick(m.value)}>
-              <span className="emoji">{m.emoji}</span>
-              <span className="lbl">{m.label}</span>
+            <button key={m.value} className="mood-scale-btn" onClick={() => onPick(m.value)}>
+              <span className="text-[1.4rem]">{m.emoji}</span>
+              <span className="text-[.68rem]">{m.label}</span>
             </button>
           ))}
         </div>
@@ -668,26 +494,26 @@ function InfoModal({ onClose }) {
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="About Haven">
         <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
-        <h2>About Haven</h2>
-        <div style={{ height: 14 }} />
-        <div className="info-section">
+        <h2 className="modal-title">About Haven</h2>
+        <div className="h-3.5" />
+        <div className="info-section mb-4">
           <h3>What Haven is</h3>
           <p>A reflective space that draws on ideas from cognitive behavioral therapy and motivational
           interviewing — reflective listening, gentle questions, and noticing thought patterns — to help
           you talk something through and organize your own thinking.</p>
         </div>
-        <div className="info-section">
+        <div className="info-section mb-4">
           <h3>What Haven isn't</h3>
           <p>A licensed therapist, a crisis service, or a diagnostic tool. It can't read your history or
           your tone of voice the way a person can. If you're in danger or thinking about harming yourself,
           please contact emergency services or a crisis line right away.</p>
         </div>
-        <div className="info-section">
+        <div className="info-section mb-4">
           <h3>Privacy</h3>
           <p>Haven doesn't save what you type. Only your mood check-ins and the patterns you've noticed
           stay on this device, in your browser's local storage — never sent anywhere.</p>
         </div>
-        <div className="info-section">
+        <div className="info-section mb-4">
           <h3>If you need support now</h3>
           <CrisisResources />
         </div>
@@ -710,14 +536,16 @@ function MoodChart({ entries }) {
 
   if (data.length === 0) return null;
 
+  const axisLabel = "text-[9px] font-body fill-ink-faint dark:fill-ink-dark-faint";
+
   return (
-    <div className="chart-wrap">
-      <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet">
-        <line x1={padX} y1={yFor(5)} x2={W - padX} y2={yFor(5)} stroke="var(--line)" strokeWidth="1" />
-        <line x1={padX} y1={yFor(1)} x2={W - padX} y2={yFor(1)} stroke="var(--line)" strokeWidth="1" />
-        <text x={padX} y={yFor(5) - 6} className="chart-axis-label">great</text>
-        <text x={padX} y={yFor(1) + 12} className="chart-axis-label">rough</text>
-        {data.length > 1 && <path d={path} fill="none" stroke="var(--moss)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
+    <div className="relative">
+      <svg className="w-full h-auto overflow-visible" viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet">
+        <line x1={padX} y1={yFor(5)} x2={W - padX} y2={yFor(5)} className="stroke-line dark:stroke-line-dark" strokeWidth="1" />
+        <line x1={padX} y1={yFor(1)} x2={W - padX} y2={yFor(1)} className="stroke-line dark:stroke-line-dark" strokeWidth="1" />
+        <text x={padX} y={yFor(5) - 6} className={axisLabel}>great</text>
+        <text x={padX} y={yFor(1) + 12} className={axisLabel}>rough</text>
+        {data.length > 1 && <path d={path} fill="none" className="stroke-moss dark:stroke-moss-dark" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
         {points.map((p, i) => {
           const isLast = i === points.length - 1;
           return (
@@ -725,8 +553,8 @@ function MoodChart({ entries }) {
               <circle cx={p.x} cy={p.y} r="9" fill="transparent">
                 <title>{formatDay(p.t) + ' — ' + moodMeta(p.value).label + ' (' + p.value + '/5)'}</title>
               </circle>
-              <circle cx={p.x} cy={p.y} r={isLast ? 5 : 3.5} className={isLast ? 'chart-point-last' : 'chart-point'} />
-              {isLast && <text x={p.x} y={p.y - 12} textAnchor="end" className="chart-axis-label" style={{ fontWeight: 700, fill: 'var(--moss)' }}>{moodMeta(p.value).label}</text>}
+              <circle cx={p.x} cy={p.y} r={isLast ? 5 : 3.5} className={isLast ? 'fill-moss dark:fill-moss-dark' : 'fill-paper-raised dark:fill-paper-dark-raised stroke-moss dark:stroke-moss-dark'} strokeWidth={isLast ? 0 : 2} />
+              {isLast && <text x={p.x} y={p.y - 12} textAnchor="end" className={axisLabel + ' font-bold fill-moss dark:fill-moss-dark'}>{moodMeta(p.value).label}</text>}
             </g>
           );
         })}
@@ -752,24 +580,24 @@ function Reflections({ state, onBack, onCheckIn }) {
     .slice(0, 5);
 
   return (
-    <div className="reflections-wrap">
-      <button className="subbar-btn" onClick={onBack} style={{ marginBottom: 16 }}><BackIcon /> Back to conversation</button>
-      <h1>Reflections</h1>
-      <p className="reflections-sub">What's been noticed so far — kept only on this device.</p>
+    <div className="flex-1 max-w-[720px] w-full mx-auto px-[clamp(16px,4vw,32px)] pt-6 pb-[60px]">
+      <button className="subbar-btn mb-4" onClick={onBack}><BackIcon /> Back to conversation</button>
+      <h1 className="font-display font-medium text-[1.9rem] m-0 mb-1">Reflections</h1>
+      <p className="text-ink-faint dark:text-ink-dark-faint text-[.88rem] m-0 mb-7">What's been noticed so far — kept only on this device.</p>
 
       <div className="section">
-        <div className="checkin-row" style={{ marginBottom: 14 }}>
-          <h2 style={{ margin: 0 }}>How you've been arriving</h2>
-          <button className="btn-primary" style={{ padding: '8px 16px', fontSize: '.85rem' }} onClick={onCheckIn}>Check in</button>
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-3.5">
+          <h2 className="section-heading">How you've been arriving</h2>
+          <button className="btn-primary !px-4 !py-2 !text-[.85rem]" onClick={onCheckIn}>Check in</button>
         </div>
         {state.moodLog.length ? <MoodChart entries={state.moodLog} /> : (
           <p className="section-empty">Nothing logged yet — check in on how you're arriving and it'll show up here.</p>
         )}
-        {state.moodLog.length > 0 && <p className="streak" style={{ marginTop: 10 }}>{state.moodLog.length} check-in{state.moodLog.length === 1 ? '' : 's'} logged</p>}
+        {state.moodLog.length > 0 && <p className="font-mono text-[.8rem] text-ink-soft dark:text-ink-dark-soft mt-2.5">{state.moodLog.length} check-in{state.moodLog.length === 1 ? '' : 's'} logged</p>}
       </div>
 
       <div className="section">
-        <h2>Patterns noticed</h2>
+        <h2 className="section-heading mb-4">Patterns noticed</h2>
         {distortionEntries.length ? (
           <ul className="pattern-list">
             {distortionEntries.map(([key, n]) => {
@@ -781,11 +609,11 @@ function Reflections({ state, onBack, onCheckIn }) {
       </div>
 
       <div className="section">
-        <h2>What's helped</h2>
+        <h2 className="section-heading mb-4">What's helped</h2>
         {toolEntries.length ? (
           <ul className="tools-list">
             {toolEntries.map((t, i) => (
-              <li key={t.key}><span className="tool-rank">#{i + 1}</span><span>{TOOLS[t.key] ? TOOLS[t.key].label : t.key} <span style={{ color: 'var(--ink-faint)' }}>— marked helpful {t.fb.helped}×</span></span></li>
+              <li key={t.key}><span className="tool-rank">#{i + 1}</span><span>{TOOLS[t.key] ? TOOLS[t.key].label : t.key} <span className="text-ink-faint dark:text-ink-dark-faint">— marked helpful {t.fb.helped}×</span></span></li>
             ))}
           </ul>
         ) : <p className="section-empty">Once you tell Haven whether a suggestion helped, the ones that work best for you will show up here.</p>}
@@ -800,7 +628,7 @@ function Reflections({ state, onBack, onCheckIn }) {
 
 function AgentBubble({ children }) {
   return (
-    <div className="turn agent">
+    <div className="turn-row agent">
       <div className="bubble agent">
         <span className="agent-name">Haven</span>
         {children}
@@ -811,7 +639,7 @@ function AgentBubble({ children }) {
 
 function ReframeCard({ reframe }) {
   return (
-    <div className="turn agent">
+    <div className="turn-row agent">
       <div className="card card-reframe">
         <p className="card-title">🌿 A thought pattern — {reframe.name}</p>
         <p className="card-text">{reframe.text}</p>
@@ -822,7 +650,7 @@ function ReframeCard({ reframe }) {
 
 function ToolCard({ tool, feedback, onFeedback }) {
   return (
-    <div className="turn agent">
+    <div className="turn-row agent">
       <div className="card card-tool">
         <p className="card-title">{tool.icon} {tool.label}</p>
         <p className="card-text">{tool.text}</p>
@@ -837,10 +665,10 @@ function ToolCard({ tool, feedback, onFeedback }) {
 
 function CrisisCard() {
   return (
-    <div className="turn agent">
+    <div className="turn-row agent">
       <div className="card-crisis">
-        <p className="card-title">Let's pause here for a second.</p>
-        <p>What you just shared matters, and it's more than I'm equipped to hold alone. You deserve
+        <p className="card-title text-crisis dark:text-crisis-dark text-[.92rem]">Let's pause here for a second.</p>
+        <p className="text-[.92rem] leading-relaxed mb-3 mt-0 text-ink dark:text-ink-dark">What you just shared matters, and it's more than I'm equipped to hold alone. You deserve
         support from someone who can really be there — reaching out doesn't mean things are hopeless,
         it means you're taking this seriously.</p>
         <CrisisResources />
@@ -940,21 +768,21 @@ function ChatView({ persisted, setPersisted, onOpenReflections, onOpenInfo, onCh
   const newConversation = () => { setMessages([]); setTurnCount(0); };
 
   return (
-    <div className="chat-wrap">
-      <div className="chat-subbar">
+    <div className="flex-1 flex flex-col max-w-[720px] w-full mx-auto min-h-0">
+      <div className="flex items-center justify-between px-[clamp(16px,4vw,32px)] pt-2">
         <button className="subbar-btn" onClick={newConversation}>Start fresh</button>
         <button className="subbar-btn" onClick={onOpenReflections}><ChartIcon /> Reflections</button>
       </div>
 
-      <div className="thread stitch" ref={threadRef}>
+      <div className="stitch-line flex-1 overflow-y-auto pr-[clamp(16px,4vw,32px)] pt-5 pb-2.5 flex flex-col" ref={threadRef}>
         {messages.length === 0 && (
-          <div className="empty-thread">
-            <p>Say whatever's on your mind — typed or spoken. Haven will listen, ask a question or two, and
+          <div className="flex-1 flex items-center justify-center text-center text-ink-faint dark:text-ink-dark-faint px-5 py-10">
+            <p className="max-w-[320px] text-[.92rem] leading-relaxed mx-auto">Say whatever's on your mind — typed or spoken. Haven will listen, ask a question or two, and
             offer something to try if it seems useful.</p>
           </div>
         )}
         {messages.map(m => {
-          if (m.role === 'user') return <div key={m.id} className="turn user"><div className="bubble user">{m.text}</div></div>;
+          if (m.role === 'user') return <div key={m.id} className="turn-row user"><div className="bubble user">{m.text}</div></div>;
           if (m.role === 'agent') return <AgentBubble key={m.id}>{m.text}</AgentBubble>;
           if (m.role === 'reframe') return <ReframeCard key={m.id} reframe={m.reframe} />;
           if (m.role === 'tool') return <ToolCard key={m.id} tool={m.tool} feedback={m.feedback} onFeedback={(v) => { setMessageFeedback(m.id, v); recordToolFeedback(m.tool.key, v === 'helped'); }} />;
@@ -962,20 +790,23 @@ function ChatView({ persisted, setPersisted, onOpenReflections, onOpenInfo, onCh
           return null;
         })}
         {typing && (
-          <div className="turn agent">
-            <div className="bubble agent typing-row">
-              <span className="typing-dot"></span><span className="typing-dot"></span><span className="typing-dot"></span>
+          <div className="turn-row agent">
+            <div className="bubble agent flex items-center gap-[5px] py-1">
+              <span className="typing-dot"></span>
+              <span className="typing-dot [animation-delay:150ms]"></span>
+              <span className="typing-dot [animation-delay:300ms]"></span>
             </div>
           </div>
         )}
       </div>
 
-      <div className="composer-wrap">
-        {voice.error === 'not-allowed' && <p className="mic-error">Microphone access was blocked — you can still type.</p>}
-        <div className="composer">
+      <div className="px-[clamp(16px,4vw,32px)] pb-[clamp(14px,3vw,22px)] pt-2.5 border-t border-line dark:border-line-dark bg-paper dark:bg-paper-dark">
+        {voice.error === 'not-allowed' && <p className="text-[.78rem] text-crisis dark:text-crisis-dark mb-2">Microphone access was blocked — you can still type.</p>}
+        <div className="flex items-end gap-2 bg-paper-raised dark:bg-paper-dark-raised border border-line dark:border-line-dark rounded-[22px] pl-4 pr-2 py-2 shadow-s">
           <textarea
             ref={textareaRef}
             rows={1}
+            className="flex-1 resize-none border-0 outline-none bg-transparent text-ink dark:text-ink-dark text-[.95rem] leading-relaxed py-2 max-h-[140px] placeholder:text-ink-faint dark:placeholder:text-ink-dark-faint"
             value={draft}
             placeholder={voice.listening ? 'Listening…' : "Type how you're feeling…"}
             onChange={e => { setDraft(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px'; }}
@@ -991,8 +822,8 @@ function ChatView({ persisted, setPersisted, onOpenReflections, onOpenInfo, onCh
             <SendIcon />
           </button>
         </div>
-        <p className="safety-note">
-          Haven is a supportive tool, not a therapist. In crisis? <a href="tel:988">Call or text 988</a> (US). <button onClick={onOpenInfo}>More info</button>
+        <p className="text-center text-[.74rem] text-ink-faint dark:text-ink-dark-faint mt-2.5">
+          Haven is a supportive tool, not a therapist. In crisis? <a href="tel:988">Call or text 988</a> (US). <button className="underline cursor-pointer bg-transparent border-0 text-inherit p-0" onClick={onOpenInfo}>More info</button>
         </p>
       </div>
     </div>
@@ -1005,12 +836,12 @@ function ChatView({ persisted, setPersisted, onOpenReflections, onOpenInfo, onCh
 
 function TopBar({ theme, onToggleTheme, onOpenInfo, moodToday, onCheckIn, view, onGoChat }) {
   return (
-    <div className="topbar">
-      <a className="brand" href="#" onClick={e => { e.preventDefault(); onGoChat(); }}>
-        <BrandMark className="brand-mark" />
-        <span className="brand-name">Haven</span>
+    <div className="flex items-center justify-between px-[clamp(16px,4vw,32px)] py-3.5 border-b border-line dark:border-line-dark bg-paper dark:bg-paper-dark sticky top-0 z-20">
+      <a className="flex items-center gap-2 no-underline text-ink dark:text-ink-dark" href="#" onClick={e => { e.preventDefault(); onGoChat(); }}>
+        <BrandMark className="w-5 h-5 shrink-0" />
+        <span className="font-display italic font-medium text-[1.28rem] tracking-wide">Haven</span>
       </a>
-      <div className="topbar-actions">
+      <div className="flex items-center gap-1.5">
         <button className="mood-chip" onClick={onCheckIn}>
           {moodToday ? <React.Fragment>{moodMeta(moodToday.value).emoji} Logged today</React.Fragment> : 'Check in'}
         </button>
@@ -1045,7 +876,8 @@ function App() {
   const setPersisted = (updater) => setPersistedRaw(prev => (typeof updater === 'function' ? updater(prev) : updater));
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
     try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
   }, [theme]);
 
@@ -1082,7 +914,7 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="flex flex-col min-h-screen min-h-dvh">
       <TopBar
         theme={theme}
         onToggleTheme={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
