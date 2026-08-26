@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>mindease | A calmer place to think</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,ital,wght@6..72,0,400;6..72,0,500;6..72,0,600;6..72,0,700;6..72,1,400&amp;family=Inter:wght@400;500;600&amp;family=Material+Icons+Outlined&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --navy-deep: #0f4c75;
+            --emerald: #2f9e6e;
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-dark: rgba(15, 76, 117, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            color: #1a202c;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .serif { font-family: 'Newsreader', serif; }
+
+        .app-shell {
+            width: 100%;
+            max-width: 430px;
+            height: 100%;
+            max-height: 932px;
+            background: #f8fafc;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @media (min-width: 640px) {
+            .app-shell {
+                border-radius: 40px;
+                height: 90vh;
+                border: 8px solid #1a202c;
+            }
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .breathe {
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Transitions */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            background: inherit;
+            z-index: 10;
+        }
+
+        .screen.active { display: flex; }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .chat-bubble.agent {
+            background: #e2e8f0;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .chat-bubble.user {
+            background: var(--navy-deep);
+            color: white;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        /* Grounding Progress */
+        .progress-bar {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--emerald);
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell" id="app">
+<!-- Onboarding Screen -->
+<section class="screen active p-8 text-center justify-center" id="screen-onboarding">
+<div class="mb-12 slide-up">
+<div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 breathe">
+<span class="material-icons-outlined text-4xl text-[#0f4c75]">bubble_chart</span>
+</div>
+<h1 class="serif text-4xl text-[#0f4c75] font-semibold mb-4">mindease</h1>
+<p class="text-slate-500 leading-relaxed max-w-xs mx-auto">
+                A quiet, private space to reflect, find your center, and navigate tough moments at your own pace.
+            </p>
+</div>
+<div class="space-y-4 slide-up" style="animation-delay: 0.2s">
+<button class="w-full py-4 bg-[#0f4c75] text-white rounded-2xl font-medium shadow-lg shadow-blue-900/20 active:scale-95 transition-all" onclick="navigateTo('conversation')">
+                Start a session
+            </button>
+<p class="text-xs text-slate-400">Completely private. No data is saved.</p>
+</div>
+</section>
+<!-- Conversation Screen -->
+<section class="screen" id="screen-conversation">
+<header class="glass sticky top-0 z-20 px-6 py-4 flex justify-between items-center border-b border-slate-200">
+<div class="flex items-center gap-2">
+<span class="material-icons-outlined text-[#0f4c75]">bubble_chart</span>
+<span class="serif font-semibold text-lg text-[#0f4c75]">mindease</span>
+</div>
+<button class="flex items-center gap-1 text-slate-500 hover:text-[#0f4c75] transition-colors mr-2" onclick="navigateTo('history')">
+<span class="material-icons-outlined">history_edu</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Journals</span>
+</button><button class="text-red-500 font-bold text-xs uppercase tracking-widest px-3 py-1 bg-red-50 rounded-full">Crisis</button>
+</header>
+<div class="flex-1 overflow-y-auto p-6 flex flex-direction-column space-y-4" id="chat-container">
+<div class="chat-bubble agent slide-up">
+                Good morning. It's peaceful in here today. How are you feeling as you start your day?
+            </div>
+</div>
+<!-- Suggestions -->
+<div class="px-6 py-2 flex gap-2 overflow-x-auto no-scrollbar" id="suggestions">
+<button class="whitespace-nowrap px-4 py-2 bg-white border border-slate-200 rounded-full text-sm text-slate-600 shadow-sm active:bg-slate-50" onclick="handleUserMessage('I feel overwhelmed')">Overwhelmed</button>
+<button class="whitespace-nowrap px-4 py-2 bg-white border border-slate-200 rounded-full text-sm text-slate-600 shadow-sm active:bg-slate-50" onclick="handleUserMessage('Just checking in')">Checking in</button>
+</div>
+<footer class="p-4 bg-white border-t border-slate-200">
+<div class="flex items-center gap-3 bg-slate-50 rounded-2xl px-4 py-2 border border-slate-200">
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 text-sm resize-none py-2" id="user-input" placeholder="Share your thoughts..." rows="1"></textarea>
+<button class="w-10 h-10 bg-[#0f4c75] text-white rounded-full flex items-center justify-center active:scale-90 transition-transform" onclick="handleSend()">
+<span class="material-icons-outlined">send</span>
+</button>
+</div>
+</footer>
+</section>
+<!-- Grounding Screen -->
+<section class="screen p-8 bg-slate-50" id="screen-grounding">
+<header class="mb-12">
+<div class="flex justify-between items-center mb-4">
+<button class="material-icons-outlined text-slate-400" onclick="navigateTo('conversation')">close</button>
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">5-4-3-2-1 Grounding</span>
+<div class="w-6"></div>
+</div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-[#2f9e6e] uppercase tracking-wider" id="step-count">Step 1 of 5</span>
+<span class="text-xs font-bold text-slate-400 uppercase tracking-wider" id="step-label">Sight</span>
+</div>
+<div class="progress-bar">
+<div class="progress-fill" id="progress-fill" style="width: 20%"></div>
+</div>
+</header>
+<div class="flex-1 text-center flex flex-col justify-center">
+<div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-sm breathe" id="grounding-icon-container">
+<span class="material-icons-outlined text-4xl text-[#0f4c75]" id="grounding-icon">visibility</span>
+</div>
+<h2 class="serif text-3xl text-[#0f4c75] mb-6" id="grounding-title">Acknowledge 5 things you see</h2>
+<p class="text-slate-500 leading-relaxed mb-12" id="grounding-body">
+                Look closely at your environment. Notice a spot on the wall, the texture of a desk, or a pattern you usually ignore.
+            </p>
+<div class="flex justify-center gap-3 mb-12" id="grounding-interactive">
+<!-- Dots populated by JS -->
+</div>
+</div>
+<button class="w-full py-4 bg-[#0f4c75] text-white rounded-2xl font-medium shadow-lg disabled:opacity-30 transition-all" disabled="" id="grounding-next" onclick="nextGroundingStep()">
+            Continue to Step 2
+        </button>
+</section>
+<!-- Summary Screen -->
+<section class="screen p-8 justify-center text-center" id="screen-summary">
+<div class="slide-up">
+<div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+<span class="material-icons-outlined text-4xl text-[#2f9e6e]">verified</span>
+</div>
+<h1 class="serif text-3xl text-[#0f4c75] mb-4">Breathe easy</h1>
+<p class="text-slate-500 mb-12">You've taken a moment for yourself. That's a significant win.</p>
+<div class="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm text-left mb-12">
+<p class="text-xs font-bold uppercase text-slate-400 tracking-widest mb-3">Today's Focus</p>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+<span class="material-icons-outlined text-blue-600">spa</span>
+</div>
+<div>
+<p class="text-sm font-semibold">Grounding Exercise</p>
+<p class="text-xs text-slate-400">5 minutes • Sensory awareness</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+<span class="material-icons-outlined text-emerald-600">insights</span>
+</div>
+<div>
+<p class="text-sm font-semibold">Reflection</p>
+<p class="text-xs text-slate-400">Pattern: Overwhelm noted</p>
+</div>
+</div>
+</div>
+<button class="w-full py-4 bg-[#0f4c75] text-white rounded-2xl font-medium shadow-lg" onclick="navigateTo('conversation')">
+                Back to Session
+            </button>
+</div>
+</section><section class="screen bg-slate-50 overflow-y-auto" id="screen-history">
+<header class="glass sticky top-0 z-20 px-6 py-4 flex items-center border-b border-slate-200">
+<button class="material-icons-outlined text-slate-400 mr-4" onclick="navigateTo('conversation')">arrow_back</button>
+<h1 class="serif text-xl font-semibold text-[#0f4c75]">Your Reflection History</h1>
+</header>
+<div class="p-6 space-y-4">
+<!-- Journal Entry 1 -->
+<div class="glass p-5 rounded-3xl shadow-sm border border-white/50 active:scale-[0.98] transition-transform">
+<div class="flex justify-between items-start mb-3">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Oct 12, 2023</span>
+<span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase rounded-full">Calm</span>
+</div>
+<p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                Today I focused on my breathing. The grounding exercise really helped me settle into the morning routine without feeling rushed...
+            </p>
+</div>
+<!-- Journal Entry 2 -->
+<div class="glass p-5 rounded-3xl shadow-sm border border-white/50 active:scale-[0.98] transition-transform">
+<div class="flex justify-between items-start mb-3">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Oct 10, 2023</span>
+<span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded-full">Anxious</span>
+</div>
+<p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                Work felt overwhelming today. I used the 5-4-3-2-1 technique in the breakroom. It's hard to stay present when the inbox is full...
+            </p>
+</div>
+<!-- Journal Entry 3 -->
+<div class="glass p-5 rounded-3xl shadow-sm border border-white/50 active:scale-[0.98] transition-transform">
+<div class="flex justify-between items-start mb-3">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Oct 08, 2023</span>
+<span class="px-3 py-1 bg-red-50 text-red-500 text-[10px] font-bold uppercase rounded-full">Stressed</span>
+</div>
+<p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                Navigating a tough conversation with family. Trying to remember that I can only control my own reactions and peace...
+            </p>
+</div>
+</div>
+</section>
+</div>
+<script>
+    let currentScreen = 'onboarding';
+    let groundingStep = 0;
+    let clickedDots = 0;
+
+    const groundingSteps = [
+        { title: "Acknowledge 5 things you see", label: "Sight", icon: "visibility", count: 5, body: "Look closely at your environment. Notice a spot on the wall, the texture of a desk, or a pattern you usually ignore." },
+        { title: "Notice 4 things you can feel", label: "Touch", icon: "back_hand", count: 4, body: "The fabric of your clothes, the temperature of the air, or the chair supporting you." },
+        { title: "Name 3 things you can hear", label: "Sound", icon: "hearing", count: 3, body: "The hum of a fridge, distant traffic, or the sound of your own breathing." },
+        { title: "Notice 2 things you can smell", label: "Smell", icon: "air", count: 2, body: "The scent of coffee, fresh rain, or even just the subtle smell of the room." },
+        { title: "Notice 1 thing you can taste", label: "Taste", icon: "restaurant", count: 1, body: "A sip of water, a mint, or simply the current taste in your mouth." }
+    ];
+
+    function navigateTo(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(`screen-${screenId}`).classList.add('active');
+        currentScreen = screenId;
+
+        if(screenId === 'grounding') startGrounding();
+    }
+
+    function handleSend() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if(text) {
+            addMessage(text, 'user');
+            input.value = '';
+
+            // AI Response Logic
+            setTimeout(() => {
+                if(text.toLowerCase().includes('grounding') || text.toLowerCase().includes('help') || text.toLowerCase().includes('overwhelmed')) {
+                    addMessage("I'm noticing some tension. Would it help to try a quick grounding exercise together? It takes about 2 minutes.", 'agent');
+                    showGroundingInvite();
+                } else {
+                    addMessage("I hear you. Tell me more about what's making you feel that way.", 'agent');
+                }
+            }, 1000);
+        }
+    }
+
+    function handleUserMessage(text) {
+        addMessage(text, 'user');
+        setTimeout(() => {
+            if(text.toLowerCase().includes('overwhelmed')) {
+                addMessage("That sounds heavy. Let's try a 5-4-3-2-1 grounding exercise to bring you back to the present moment.", 'agent');
+                showGroundingInvite();
+            } else {
+                addMessage("Thank you for sharing. I'm here to listen.", 'agent');
+            }
+        }, 1000);
+    }
+
+    function addMessage(text, type) {
+        const container = document.getElementById('chat-container');
+        const div = document.createElement('div');
+        div.className = `chat-bubble ${type} slide-up`;
+        div.textContent = text;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function showGroundingInvite() {
+        const container = document.getElementById('chat-container');
+        const div = document.createElement('div');
+        div.className = 'w-full slide-up mt-4';
+        div.innerHTML = `
+            <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="material-icons-outlined text-[#2f9e6e]">spa</span>
+                    <span class="text-sm font-semibold">Recommended Technique</span>
+                </div>
+                <p class="text-sm text-slate-500 mb-4">5-4-3-2-1 Grounding helps quiet racing thoughts by engaging your senses.</p>
+                <button onclick="navigateTo('grounding')" class="w-full py-3 bg-[#e2e8f0] text-[#0f4c75] rounded-xl font-semibold text-sm hover:bg-slate-200 transition-colors">Start Exercise</button>
+            </div>
+        `;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function startGrounding() {
+        groundingStep = 0;
+        updateGroundingUI();
+    }
+
+    function updateGroundingUI() {
+        const step = groundingSteps[groundingStep];
+        document.getElementById('step-count').textContent = `Step ${groundingStep + 1} of 5`;
+        document.getElementById('step-label').textContent = step.label;
+        document.getElementById('progress-fill').style.width = `${(groundingStep + 1) * 20}%`;
+        document.getElementById('grounding-icon').textContent = step.icon;
+        document.getElementById('grounding-title').textContent = step.title;
+        document.getElementById('grounding-body').textContent = step.body;
+        document.getElementById('grounding-next').textContent = groundingStep === 4 ? "Finish Exercise" : `Continue to ${groundingSteps[groundingStep+1]?.label || ''}`;
+        document.getElementById('grounding-next').disabled = true;
+
+        const interactive = document.getElementById('grounding-interactive');
+        interactive.innerHTML = '';
+        clickedDots = 0;
+
+        for(let i = 0; i < step.count; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'w-10 h-10 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-300 transition-all active:scale-90';
+            dot.innerHTML = `<span class="material-icons-outlined text-sm">check</span>`;
+            dot.onclick = () => {
+                dot.className = 'w-10 h-10 rounded-full bg-[#2f9e6e] border-2 border-[#2f9e6e] flex items-center justify-center text-white transition-all';
+                clickedDots++;
+                if(clickedDots === step.count) document.getElementById('grounding-next').disabled = false;
+            };
+            interactive.appendChild(dot);
+        }
+    }
+
+    function nextGroundingStep() {
+        if(groundingStep < 4) {
+            groundingStep++;
+            updateGroundingUI();
+        } else {
+            navigateTo('summary');
+        }
+    }
+
+    // Auto-scroll chat on start
+    window.onload = () => {
+        const container = document.getElementById('chat-container');
+        container.scrollTop = container.scrollHeight;
+    };
+</script>
+</body>
+</html>
